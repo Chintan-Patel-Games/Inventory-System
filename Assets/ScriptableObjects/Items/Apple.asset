@@ -13,7 +13,12 @@ MonoBehaviour:
   m_Name: Apple
   m_EditorClassIdentifier: 
   itemName: Apple
-  icon: {fileID: 21300000, guid: ed1a22ab0ec3fd1448507a5348938772, type: 3}
   type: 2
-  maxStack: 64
-  value: 10
+  icon: {fileID: 21300000, guid: 5d9ba4e7d0964044ea54abe409d81dfd, type: 3}
+  description: A simple plain Apple
+  buyValue: 50
+  sellValue: 10
+  weight: 1
+  rarity: 0
+  quantity: 100
+  maxStack: 500

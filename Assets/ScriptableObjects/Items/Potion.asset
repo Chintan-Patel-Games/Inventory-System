@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05e002e0134494d4792400827db63143, type: 3}
+  m_Name: Potion
+  m_EditorClassIdentifier: 
+  itemName: Potion
+  type: 2
+  icon: {fileID: 21300000, guid: e52ea25af699fd445b7046374f81a5b9, type: 3}
+  description: A common Health potion to replenis your health
+  buyValue: 50
+  sellValue: 10
+  weight: 5
+  rarity: 1
+  quantity: 100
+  maxStack: 999

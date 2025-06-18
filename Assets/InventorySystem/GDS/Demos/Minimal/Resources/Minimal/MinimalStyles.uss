@@ -1,0 +1,103 @@
+:root {
+  --bg-slice-size: 45;
+  --cell-size: 64px;
+}
+
+.root-layer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.display-none {
+  display: none;
+}
+
+.debug-label {
+  display: none;
+  position: absolute;
+  color: #999;
+}
+
+.debug-window {
+  padding: 10px 16px;
+}
+
+.list-bag {
+  padding: 64px;
+  background-image: resource("Shared/Images/backgrounds/bg-window");
+  -unity-slice-top: var(--bg-slice-size);
+  -unity-slice-right: var(--bg-slice-size);
+  -unity-slice-bottom: var(--bg-slice-size);
+  -unity-slice-left: var(--bg-slice-size);
+}
+
+.list-bag .slot-container {
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 1000px;
+  width: 660px;
+}
+
+.slot {
+  width: 64px;
+  height: 64px;
+  background-image: resource("Shared/Images/backgrounds/bg-slot");
+  margin: 0 1px 1px 0;
+  border-width: 1px;
+  border-color: #666;
+  overflow: hidden;
+}
+
+.slot:hover {
+  border-width: 1px;
+  border-color: #b8abf5;
+}
+
+.item {
+  min-width: var(--cell-size);
+  min-height: var(--cell-size);
+}
+
+.item-image {
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+}
+
+.item-quant {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  background-color: rgba(31, 31, 31, 0.75);
+  color: #d2d2d2;
+  padding: 0px 4px;
+}
+
+.ghost-item {
+  position: absolute;
+  translate: -50% -50%;
+  border-width: 1px;
+  border-color: #555;
+}
+
+.overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.legal-action .overlay {
+  background-color: rgba(200, 255, 200, 0.25);
+}
+.illegal-action .overlay {
+  background-color: rgba(247, 57, 57, 0.37);
+}
+
+.title {
+  color: #aaa;
+  font-size: 16px;
+  margin: 4px 0;
+}
