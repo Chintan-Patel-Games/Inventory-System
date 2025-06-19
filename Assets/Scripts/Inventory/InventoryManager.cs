@@ -6,9 +6,10 @@ public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance { get; private set; }
 
-    public int maxSlots = 20;
+    public int maxSlots = 24;
     public List<InventorySlot> slots = new();
     public Transform slotParent;
+    public GameObject slotPrefab;
 
     // Events for buying/selling
     public event Action<ItemData, int> OnItemBought;
@@ -20,39 +21,61 @@ public class InventoryManager : MonoBehaviour
         else Destroy(gameObject);
 
         for (int i = 0; i < maxSlots; i++)
+        {
             slots.Add(new InventorySlot());
+
+            GameObject obj = Instantiate(slotPrefab, slotParent);
+            InventorySlotUI ui = obj.GetComponent<InventorySlotUI>();
+            ui.Setup(this, i);
+        }
     }
 
     // Called by gathering/pickup scripts
     public bool AddItem(ItemData item, int count = 1)
     {
-        // Check if stackable
-        for (int i = 0; i < slots.Count; i++)
-        {
-            if (slots[i].item == item && slots[i].count < item.maxStack)
-            {
-                int space = item.maxStack - slots[i].count;
-                int added = Mathf.Min(space, count);
-                slots[i].count += added;
-                count -= added;
+        int originalCount = count;
 
-                if (count <= 0) return true;
+        // Try stacking in existing stacks
+        foreach (var slot in slots)
+        {
+            if (slot.item == item && slot.count < item.maxStack)
+            {
+                int space = item.maxStack - slot.count;
+                int toAdd = Mathf.Min(space, count);
+                slot.count += toAdd;
+                count -= toAdd;
+
+                if (count <= 0)
+                {
+                    RefreshAllSlots();
+                    return true;
+                }
             }
         }
 
-        // Add to empty slot(s)
-        for (int i = 0; i < slots.Count && count > 0; i++)
+        // Try placing in empty slots
+        foreach (var slot in slots)
         {
-            if (slots[i].IsEmpty)
+            if (slot.IsEmpty)
             {
                 int toAdd = Mathf.Min(item.maxStack, count);
-                slots[i].item = item;
-                slots[i].count = toAdd;
+                slot.item = item;
+                slot.count = toAdd;
                 count -= toAdd;
+
+                if (count <= 0)
+                {
+                    RefreshAllSlots();
+                    return true;
+                }
             }
         }
 
-        return count <= 0;
+        // Partial or no addition
+        if (originalCount != count)
+            RefreshAllSlots();
+
+        return false; // Not all items could be added
     }
 
     public void RemoveItem(ItemData item, int count = 1)

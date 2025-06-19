@@ -9,8 +9,6 @@ public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IBeginDragHa
     public TMP_Text countText;   // Quantity text
 
     private Canvas canvas;
-    private RectTransform rectTransform;
-    private CanvasGroup canvasGroup;
     private InventoryManager manager;
     private int index;
 
@@ -21,8 +19,6 @@ public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IBeginDragHa
         this.manager = manager;
         this.index = index;
         canvas = GetComponentInParent<Canvas>();
-        rectTransform = GetComponent<RectTransform>();
-        canvasGroup = GetComponent<CanvasGroup>();
         UpdateSlot();
     }
 
