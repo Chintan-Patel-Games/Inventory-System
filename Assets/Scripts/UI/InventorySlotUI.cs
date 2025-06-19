@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
+    public Image rarityBG;       // bg_img for rarity
     public Image icon;           // Item image
     public TMP_Text countText;   // Quantity text
 
@@ -26,18 +27,33 @@ public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IBeginDragHa
     {
         InventorySlot slot = manager.slots[index];
 
-        if (!slot.IsEmpty)
+        if (slot.item != null)
         {
             icon.sprite = slot.item.icon;
-            icon.enabled = true;
+            icon.gameObject.SetActive(true);
             countText.text = slot.count > 1 ? slot.count.ToString() : "";
+
+            // If item is VeryCommon, make background transparent
+            if (slot.item.rarity == Rarity.VeryCommon)
+            {
+                rarityBG.sprite = null;
+                rarityBG.color = new Color(1f, 1f, 1f, 0f); // fully transparent
+            }
+            else
+            {
+                rarityBG.sprite = manager.GetRaritySprite(slot.item.rarity);
+                rarityBG.color = Color.white;
+            }
         }
         else
         {
-            icon.enabled = false;
+            icon.gameObject.SetActive(false);
             countText.text = "";
+
+            rarityBG.color = new Color(1f, 1f, 1f, 0f); // faded
         }
     }
+
 
     public void OnPointerClick(PointerEventData eventData)
     {
@@ -49,6 +65,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IBeginDragHa
         InventorySlot slot = manager.slots[index];
         if (slot.IsEmpty) return;
 
+        rarityBG.enabled = false;
         icon.enabled = false;
         countText.enabled = false;
 
@@ -97,6 +114,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IBeginDragHa
         if (dragIconObject != null)
             Destroy(dragIconObject);
 
+        rarityBG.enabled = true;
         icon.enabled = true;
         countText.enabled = true;
 

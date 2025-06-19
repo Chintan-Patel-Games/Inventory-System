@@ -397,8 +397,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4281417289
+  m_fontColor: {r: 0.28627452, g: 0.24313726, b: 0.19215687, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1116,6 +1116,15 @@ MonoBehaviour:
   slots: []
   slotParent: {fileID: 844164376}
   slotPrefab: {fileID: 2985012257150946631, guid: fd24aa909760b0240a8dd7e9434ad906, type: 3}
+  commonBG: {fileID: 21300000, guid: c1c3b8a66279725439fde8f23b28c1ca, type: 3}
+  rareBG: {fileID: 21300000, guid: 7df128936abc5a947ae465ec490d85de, type: 3}
+  epicBG: {fileID: 21300000, guid: 3e59d475424998e42b8452df65d52148, type: 3}
+  legendaryBG: {fileID: 21300000, guid: bd90d58cb87916b46ba8c190ebb14cb6, type: 3}
+  testItemVeryCommon: {fileID: 11400000, guid: 6e8727d65e3c5a64c9b582b2d2b92ffb, type: 2}
+  testItemCommon: {fileID: 11400000, guid: 8642d3e6eb179d546995008d0f654986, type: 2}
+  testItemRare: {fileID: 11400000, guid: b67f4e80fdad9e440b74bc23efdf33c6, type: 2}
+  testItemEpic: {fileID: 11400000, guid: 3b767cde5c636004296b1ccbf4c3776c, type: 2}
+  testItemLegendary: {fileID: 11400000, guid: 0a5a237ebf9486f40a996f2fcc011a13, type: 2}
 --- !u!1 &844164375
 GameObject:
   m_ObjectHideFlags: 0
@@ -1733,8 +1742,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4281417289
+  m_fontColor: {r: 0.28627452, g: 0.24313727, b: 0.19215688, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:

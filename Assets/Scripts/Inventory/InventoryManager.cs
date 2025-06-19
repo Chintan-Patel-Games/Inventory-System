@@ -11,6 +11,19 @@ public class InventoryManager : MonoBehaviour
     public Transform slotParent;
     public GameObject slotPrefab;
 
+    [Header("Rarity Backgrounds")]
+    public Sprite commonBG;
+    public Sprite rareBG;
+    public Sprite epicBG;
+    public Sprite legendaryBG;
+
+    [Header("Test Items")]
+    public ItemData testItemVeryCommon;
+    public ItemData testItemCommon;
+    public ItemData testItemRare;
+    public ItemData testItemEpic;
+    public ItemData testItemLegendary;
+
     // Events for buying/selling
     public event Action<ItemData, int> OnItemBought;
     public event Action<ItemData, int> OnItemSold;
@@ -27,7 +40,26 @@ public class InventoryManager : MonoBehaviour
             GameObject obj = Instantiate(slotPrefab, slotParent);
             InventorySlotUI ui = obj.GetComponent<InventorySlotUI>();
             ui.Setup(this, i);
+
+            // Only add 4 test items in first 4 slots
+            if (i == 0) AddItem(testItemVeryCommon, 1);
+            else if (i == 1) AddItem(testItemCommon, 1);
+            else if (i == 2) AddItem(testItemRare, 1);
+            else if (i == 3) AddItem(testItemEpic, 1);
+            else if (i == 4) AddItem(testItemLegendary, 1);
         }
+    }
+
+    public Sprite GetRaritySprite(Rarity rarity)
+    {
+        return rarity switch
+        {
+            Rarity.Common => commonBG,
+            Rarity.Rare => rareBG,
+            Rarity.Epic => epicBG,
+            Rarity.Legendary => legendaryBG,
+            _ => null
+        };
     }
 
     // Called by gathering/pickup scripts
