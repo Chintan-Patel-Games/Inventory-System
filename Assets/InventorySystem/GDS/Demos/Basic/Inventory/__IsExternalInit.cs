@@ -1,0 +1,6 @@
+// Workaround for a bug that throws compiler errors when using records in C# 9
+// https://stackoverflow.com/questions/62648189/testing-c-sharp-9-0-in-vs2019-cs0518-isexternalinit-is-not-defined-or-imported
+
+namespace System.Runtime.CompilerServices {
+    internal static class IsExternalInit { }
+}
