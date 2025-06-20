@@ -19,6 +19,6 @@ MonoBehaviour:
   buyValue: 2500
   sellValue: 1000
   weight: 100
-  rarity: 3
+  rarity: 2
   quantity: 1
   maxStack: 1

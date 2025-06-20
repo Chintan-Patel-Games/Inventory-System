@@ -3,45 +3,46 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     public Image rarityBG;       // bg_img for rarity
     public Image icon;           // Item image
     public TMP_Text countText;   // Quantity text
 
     private Canvas canvas;
-    private InventoryManager manager;
+    private GameObject dragIconObject;
+    private InventorySlot slotData;
     private int index;
 
-    private GameObject dragIconObject;
+    private System.Func<Rarity, Sprite> getRaritySprite;
+    private System.Action<int, int> onSwapRequest;
 
-    public void Setup(InventoryManager manager, int index)
+    public void Setup(InventorySlot slot, int index, System.Action<int, int> onSwapRequest, System.Func<Rarity, Sprite> getRaritySprite)
     {
-        this.manager = manager;
+        this.slotData = slot;
         this.index = index;
+        this.onSwapRequest = onSwapRequest;
+        this.getRaritySprite = getRaritySprite;
         canvas = GetComponentInParent<Canvas>();
         UpdateSlot();
     }
 
     public void UpdateSlot()
     {
-        InventorySlot slot = manager.slots[index];
-
-        if (slot.item != null)
+        if (slotData.item != null)
         {
-            icon.sprite = slot.item.icon;
+            icon.sprite = slotData.item.icon;
             icon.gameObject.SetActive(true);
-            countText.text = slot.count > 1 ? slot.count.ToString() : "";
+            countText.text = slotData.count > 1 ? slotData.count.ToString() : "";
 
-            // If item is VeryCommon, make background transparent
-            if (slot.item.rarity == Rarity.VeryCommon)
+            if (slotData.item.rarity == Rarity.VeryCommon)
             {
                 rarityBG.sprite = null;
-                rarityBG.color = new Color(1f, 1f, 1f, 0f); // fully transparent
+                rarityBG.color = new Color(1f, 1f, 1f, 0f);
             }
             else
             {
-                rarityBG.sprite = manager.GetRaritySprite(slot.item.rarity);
+                rarityBG.sprite = getRaritySprite?.Invoke(slotData.item.rarity);
                 rarityBG.color = Color.white;
             }
         }
@@ -49,21 +50,17 @@ public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IBeginDragHa
         {
             icon.gameObject.SetActive(false);
             countText.text = "";
-
             rarityBG.color = new Color(1f, 1f, 1f, 0f); // faded
         }
     }
-
-
-    public void OnPointerClick(PointerEventData eventData)
+    public void OnPointerEnter(PointerEventData eventData)
     {
-        // Optional: Handle selection
+        // On Slot Hover display description
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        InventorySlot slot = manager.slots[index];
-        if (slot.IsEmpty) return;
+        if (slotData.IsEmpty) return;
 
         rarityBG.enabled = false;
         icon.enabled = false;
@@ -74,22 +71,20 @@ public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IBeginDragHa
         dragIconObject.transform.SetAsLastSibling();
 
         Image dragImage = dragIconObject.AddComponent<Image>();
-        dragImage.sprite = slot.item.icon;
+        dragImage.sprite = slotData.item.icon;
         dragImage.raycastTarget = false;
 
-        // Size and position
         RectTransform dragRect = dragIconObject.GetComponent<RectTransform>();
         dragRect.sizeDelta = icon.rectTransform.sizeDelta;
         dragRect.position = Input.mousePosition;
 
-        // Optional: Add text
-        if (slot.count > 1)
+        if (slotData.count > 1)
         {
             GameObject countGO = new GameObject("Count", typeof(RectTransform));
             countGO.transform.SetParent(dragIconObject.transform, false);
 
             var text = countGO.AddComponent<TextMeshProUGUI>();
-            text.text = slot.count.ToString();
+            text.text = slotData.count.ToString();
             text.fontSize = 18;
             text.alignment = TextAlignmentOptions.BottomRight;
             text.color = Color.white;
@@ -104,9 +99,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IBeginDragHa
     public void OnDrag(PointerEventData eventData)
     {
         if (dragIconObject != null)
-        {
             dragIconObject.GetComponent<RectTransform>().position = Input.mousePosition;
-        }
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -122,10 +115,6 @@ public class InventorySlotUI : MonoBehaviour, IPointerClickHandler, IBeginDragHa
         InventorySlotUI target = hovered?.GetComponentInParent<InventorySlotUI>();
 
         if (target != null && target.index != index)
-        {
-            manager.SwapSlots(index, target.index);
-        }
-
-        manager.RefreshAllSlots();
+            onSwapRequest?.Invoke(index, target.index);
     }
 }

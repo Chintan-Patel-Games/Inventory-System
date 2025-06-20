@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05e002e0134494d4792400827db63143, type: 3}
-  m_Name: Helmet
+  m_Name: Boots
   m_EditorClassIdentifier: 
-  itemName: Helmet
+  itemName: Boots
   type: 0
-  icon: {fileID: 21300000, guid: fd6e4fc32c78509458fc45ea4a478ba8, type: 3}
-  description: An Iron Helmet
-  buyValue: 2500
-  sellValue: 1000
-  weight: 100
+  icon: {fileID: 21300000, guid: e420c5bc93cb2604695a893500c897e3, type: 3}
+  description: An exquite looking Boot
+  buyValue: 500
+  sellValue: 100
+  weight: 50
   rarity: 2
   quantity: 1
   maxStack: 1

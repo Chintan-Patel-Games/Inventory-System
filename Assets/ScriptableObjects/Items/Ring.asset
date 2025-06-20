@@ -10,15 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05e002e0134494d4792400827db63143, type: 3}
-  m_Name: Helmet
+  m_Name: Ring
   m_EditorClassIdentifier: 
-  itemName: Helmet
+  itemName: Ring
   type: 0
-  icon: {fileID: 21300000, guid: fd6e4fc32c78509458fc45ea4a478ba8, type: 3}
-  description: An Iron Helmet
+  icon: {fileID: 21300000, guid: 970324311431c794ca338446ea889948, type: 3}
+  description: An expensive Ring
   buyValue: 2500
   sellValue: 1000
   weight: 100
-  rarity: 2
-  quantity: 1
+  rarity: 3
   maxStack: 1

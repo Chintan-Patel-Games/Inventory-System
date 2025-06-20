@@ -14,6 +14,5 @@ public class ItemData : ScriptableObject
     public int sellValue;
     public int weight;
     public Rarity rarity;
-    public int quantity;
     public int maxStack;
 }

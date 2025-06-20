@@ -2,14 +2,13 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InventoryManager : MonoBehaviour
+public class InventoryController : MonoBehaviour
 {
-    public static InventoryManager Instance { get; private set; }
-
-    public int maxSlots = 24;
-    public List<InventorySlot> slots = new();
-    public Transform slotParent;
     public GameObject slotPrefab;
+    public Transform slotParent;
+    public int maxSlots = 24;
+
+    private InventoryModel model;
 
     [Header("Rarity Backgrounds")]
     public Sprite commonBG;
@@ -17,36 +16,28 @@ public class InventoryManager : MonoBehaviour
     public Sprite epicBG;
     public Sprite legendaryBG;
 
-    [Header("Test Items")]
-    public ItemData testItemVeryCommon;
-    public ItemData testItemCommon;
-    public ItemData testItemRare;
-    public ItemData testItemEpic;
-    public ItemData testItemLegendary;
-
     // Events for buying/selling
     public event Action<ItemData, int> OnItemBought;
     public event Action<ItemData, int> OnItemSold;
 
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
+        InitializeModel();
+        InitializeView();
+    }
 
+    private void InitializeModel()
+    {
+        model = new InventoryModel(maxSlots);
+    }
+
+    private void InitializeView()
+    {
         for (int i = 0; i < maxSlots; i++)
         {
-            slots.Add(new InventorySlot());
-
             GameObject obj = Instantiate(slotPrefab, slotParent);
             InventorySlotUI ui = obj.GetComponent<InventorySlotUI>();
-            ui.Setup(this, i);
-
-            // Only add 4 test items in first 4 slots
-            if (i == 0) AddItem(testItemVeryCommon, 1);
-            else if (i == 1) AddItem(testItemCommon, 1);
-            else if (i == 2) AddItem(testItemRare, 1);
-            else if (i == 3) AddItem(testItemEpic, 1);
-            else if (i == 4) AddItem(testItemLegendary, 1);
+            ui.Setup(model.GetSlot(i), i, SwapSlots, GetRaritySprite);
         }
     }
 
@@ -68,7 +59,7 @@ public class InventoryManager : MonoBehaviour
         int originalCount = count;
 
         // Try stacking in existing stacks
-        foreach (var slot in slots)
+        foreach (var slot in model.Slots)
         {
             if (slot.item == item && slot.count < item.maxStack)
             {
@@ -86,7 +77,7 @@ public class InventoryManager : MonoBehaviour
         }
 
         // Try placing in empty slots
-        foreach (var slot in slots)
+        foreach (var slot in model.Slots)
         {
             if (slot.IsEmpty)
             {
@@ -112,18 +103,20 @@ public class InventoryManager : MonoBehaviour
 
     public void RemoveItem(ItemData item, int count = 1)
     {
-        for (int i = 0; i < slots.Count && count > 0; i++)
+        for (int i = 0; i < model.Slots.Count && count > 0; i++)
         {
-            if (slots[i].item == item)
+            if (model.Slots[i].item == item)
             {
-                int remove = Mathf.Min(count, slots[i].count);
-                slots[i].count -= remove;
+                int remove = Mathf.Min(count, model.Slots[i].count);
+                model.Slots[i].count -= remove;
                 count -= remove;
 
-                if (slots[i].count <= 0)
-                    slots[i].Clear();
+                if (model.Slots[i].count <= 0)
+                    model.Slots[i].Clear();
             }
         }
+
+        RefreshAllSlots();
     }
 
     public void BuyItem(ItemData item, int quantity)
@@ -140,10 +133,11 @@ public class InventoryManager : MonoBehaviour
 
     public void SwapSlots(int indexA, int indexB)
     {
-        // Swap the data
-        InventorySlot temp = slots[indexA];
-        slots[indexA] = slots[indexB];
-        slots[indexB] = temp;
+        var temp = model.Slots[indexA];
+        model.Slots[indexA] = model.Slots[indexB];
+        model.Slots[indexB] = temp;
+
+        RefreshAllSlots();
     }
 
     public void RefreshAllSlots()
@@ -151,8 +145,6 @@ public class InventoryManager : MonoBehaviour
         // Update the UI for each slot
         InventorySlotUI[] slotUIs = slotParent.GetComponentsInChildren<InventorySlotUI>();
         foreach (var slotUI in slotUIs)
-        {
             slotUI.UpdateSlot();
-        }
     }
 }
