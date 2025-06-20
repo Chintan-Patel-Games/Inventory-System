@@ -7,6 +7,7 @@ public class InventoryUI : MonoBehaviour
 {
     public GameObject slotPrefab;
     public Transform slotContainer;
+    public GameObject popupPanel;
 
     public void RefreshUI(List<InventorySlot> inventorySlots)
     {
