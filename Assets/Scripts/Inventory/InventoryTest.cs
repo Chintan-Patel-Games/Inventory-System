@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class InventoryTest : MonoBehaviour
 {
-    public InventoryController inventory;
-    public ItemData ironOre;
-    public ItemData potion;
-    public ItemData sword;
-    public ItemData diamond;
+    [SerializeField] private InventoryController inventory;
+    [SerializeField] private ItemData ironOre;
+    [SerializeField] private ItemData potion;
+    [SerializeField] private ItemData sword;
+    [SerializeField] private ItemData diamond;
 
     private void Start()
     {

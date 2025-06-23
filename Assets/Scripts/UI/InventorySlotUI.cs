@@ -5,11 +5,11 @@ using UnityEngine.UI;
 
 public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    public Image rarityBG;       // bg_img for rarity
-    public Image icon;           // Item image
-    public TMP_Text countText;   // Quantity text
+    [SerializeField] private Image rarityBG;       // bg_img for rarity
+    [SerializeField] private Image icon;           // Item image
+    [SerializeField] private TMP_Text countText;   // Quantity text
 
-    private Canvas canvas;
+    private CanvasGroup canvasGroup;
     private GameObject dragIconObject;
     private InventorySlot slotData;
     private int index;
@@ -23,7 +23,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IBeginDragHa
         this.index = index;
         this.onSwapRequest = onSwapRequest;
         this.getRaritySprite = getRaritySprite;
-        canvas = GetComponentInParent<Canvas>();
+        canvasGroup = GetComponent<CanvasGroup>();
         UpdateSlot();
     }
 
@@ -53,21 +53,23 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IBeginDragHa
             rarityBG.color = new Color(1f, 1f, 1f, 0f); // faded
         }
     }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
-        // On Slot Hover display description
+        //TooltipManager.Show(slotData.item);
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (slotData.IsEmpty) return;
 
+        canvasGroup.blocksRaycasts = false;
         rarityBG.enabled = false;
         icon.enabled = false;
         countText.enabled = false;
 
         dragIconObject = new GameObject("DragIcon", typeof(RectTransform), typeof(CanvasGroup));
-        dragIconObject.transform.SetParent(canvas.transform, false);
+        dragIconObject.transform.SetParent(canvasGroup.transform.root, false);
         dragIconObject.transform.SetAsLastSibling();
 
         Image dragImage = dragIconObject.AddComponent<Image>();
@@ -88,6 +90,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IBeginDragHa
             text.fontSize = 18;
             text.alignment = TextAlignmentOptions.BottomRight;
             text.color = Color.white;
+            text.raycastTarget = false;
 
             var textRect = text.GetComponent<RectTransform>();
             textRect.anchorMin = Vector2.zero;
@@ -107,6 +110,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IBeginDragHa
         if (dragIconObject != null)
             Destroy(dragIconObject);
 
+        canvasGroup.blocksRaycasts = true;
         rarityBG.enabled = true;
         icon.enabled = true;
         countText.enabled = true;
@@ -114,7 +118,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IBeginDragHa
         GameObject hovered = eventData.pointerEnter;
         InventorySlotUI target = hovered?.GetComponentInParent<InventorySlotUI>();
 
-        if (target != null && target.index != index)
+        if(target != null && target.index != index)
             onSwapRequest?.Invoke(index, target.index);
     }
 }

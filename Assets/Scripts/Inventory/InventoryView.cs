@@ -3,19 +3,31 @@ using System.Collections.Generic;
 
 public class InventoryView : MonoBehaviour
 {
-    public GameObject slotPrefab;
-    public Transform slotContainer;
-    public GameObject popupPanel;
+    [SerializeField] private GameObject slotPrefab;
+    [SerializeField] private Transform slotContainer;
+    [SerializeField] private GameObject popupPanel;
+
+    [Header("Rarity Backgrounds")]
+    [SerializeField] private Sprite commonBG;
+    [SerializeField] private Sprite rareBG;
+    [SerializeField] private Sprite epicBG;
+    [SerializeField] private Sprite legendaryBG;
 
     private List<InventorySlotUI> slotUIs = new();
-
-    private System.Func<Rarity, Sprite> getRaritySprite;
     private System.Action<int, int> onSwapRequest;
 
-    public void Initialize(System.Action<int, int> onSwapRequest, System.Func<Rarity, Sprite> getRaritySprite)
+    public void Initialize(System.Action<int, int> onSwapRequest) => this.onSwapRequest = onSwapRequest;
+
+    public Sprite GetRaritySprite(Rarity rarity)
     {
-        this.onSwapRequest = onSwapRequest;
-        this.getRaritySprite = getRaritySprite;
+        return rarity switch
+        {
+            Rarity.Common => commonBG,
+            Rarity.Rare => rareBG,
+            Rarity.Epic => epicBG,
+            Rarity.Legendary => legendaryBG,
+            _ => null
+        };
     }
 
     public void RefreshUI(List<InventorySlot> inventorySlots)
@@ -25,15 +37,14 @@ public class InventoryView : MonoBehaviour
 
         slotUIs.Clear();
 
-        System.Action refresh = () => RefreshUI(inventorySlots);
-
         for (int i = 0; i < inventorySlots.Count; i++)
         {
             var slot = inventorySlots[i];
             GameObject obj = Instantiate(slotPrefab, slotContainer);
             var slotUI = obj.GetComponent<InventorySlotUI>();
 
-            slotUI.Setup(slot, i, onSwapRequest, getRaritySprite);
+            // pass this view’s GetRaritySprite directly
+            slotUI.Setup(slot, i, onSwapRequest, GetRaritySprite);
 
             slotUIs.Add(slotUI);
         }
