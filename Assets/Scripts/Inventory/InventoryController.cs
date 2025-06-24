@@ -3,7 +3,8 @@ using UnityEngine;
 
 public class InventoryController : MonoBehaviour
 {
-    [SerializeField] private InventoryView inventoryView;
+    [SerializeField] private InventoryView view;
+    [SerializeField] private GatherManager gatherManager;
     [SerializeField] private int maxSlots = 24;
 
     private InventoryModel model;
@@ -26,13 +27,21 @@ public class InventoryController : MonoBehaviour
 
     private void InitializeView()
     {
-        inventoryView.Initialize(SwapSlots);
-        inventoryView.RefreshUI(model.Slots);
+        view.Initialize(SwapSlots);
+        view.LinkGathering(GatherItem, GetTotalWeight, GetTotalValue, GetmaxWeightLimit);
+        view.RefreshUI(model.Slots);
     }
 
-    public void RefreshAllSlots() => inventoryView.RefreshAllSlots();
+    public void RefreshAllSlots() => view.RefreshAllSlots();
 
     // Public calls from external systems
+    public void GatherItem()
+    {
+        var item = gatherManager.GetRandomItemBasedOnValue(GetTotalValue(), out int quantity);
+        if (item != null)
+            AddItem(item, quantity);
+    }
+
     public void AddItem(ItemData item, int count = 1) => model.AddItem(item, count);
 
     public void RemoveItem(ItemData item, int count = 1) => model.RemoveItem(item, count);
@@ -42,4 +51,12 @@ public class InventoryController : MonoBehaviour
     public void SellItem(ItemData item, int quantity) => model.SellItem(item, quantity);
 
     public void SwapSlots(int indexA, int indexB) => model.SwapSlots(indexA, indexB);
+
+    public InventorySlot GetSlot(int index) => model.GetSlot(index);
+
+    public int GetTotalWeight() => model.GetTotalWeight();
+
+    public int GetTotalValue() => model.GetTotalValue();
+
+    public int GetmaxWeightLimit() => model.GetMaxWeightLimit();
 }

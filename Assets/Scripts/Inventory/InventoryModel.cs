@@ -6,6 +6,7 @@ public class InventoryModel
 {
     public List<InventorySlot> Slots { get; private set; }
     public int MaxSlotCount { get; private set; }
+    private const int maxWeightLimit = 100;
 
     public event Action<ItemData, int> OnItemBought;
     public event Action<ItemData, int> OnItemSold;
@@ -19,16 +20,12 @@ public class InventoryModel
             Slots.Add(new InventorySlot());
     }
 
-    public InventorySlot GetSlot(int index)
-    {
-        if (index < 0 || index >= Slots.Count) return null;
-        return Slots[index];
-    }
-
     public bool AddItem(ItemData item, int count = 1)
     {
         int originalCount = count;
+        bool changed = false;
 
+        // Try stacking into existing slots
         foreach (var slot in Slots)
         {
             if (slot.item == item && slot.count < item.maxStack)
@@ -37,36 +34,37 @@ public class InventoryModel
                 int toAdd = Math.Min(space, count);
                 slot.count += toAdd;
                 count -= toAdd;
+                changed = true;
 
                 if (count <= 0)
-                {
-                    OnInventoryChanged?.Invoke();
-                    return true;
-                }
+                    break;
             }
         }
 
-        foreach (var slot in Slots)
+        // Try filling empty slots
+        if (count > 0)
         {
-            if (slot.IsEmpty)
+            foreach (var slot in Slots)
             {
-                int toAdd = Math.Min(item.maxStack, count);
-                slot.item = item;
-                slot.count = toAdd;
-                count -= toAdd;
-
-                if (count <= 0)
+                if (slot.IsEmpty)
                 {
-                    OnInventoryChanged?.Invoke();
-                    return true;
+                    int toAdd = Math.Min(item.maxStack, count);
+                    slot.item = item;
+                    slot.count = toAdd;
+                    count -= toAdd;
+                    changed = true;
+
+                    if (count <= 0)
+                        break;
                 }
             }
         }
 
-        if (originalCount != count)
+        if (changed)
             OnInventoryChanged?.Invoke();
 
-        return false;
+        // Return true if all items were added, false if some couldn't be added
+        return count == 0;
     }
 
     public void RemoveItem(ItemData item, int count = 1)
@@ -87,6 +85,18 @@ public class InventoryModel
         OnInventoryChanged?.Invoke();
     }
 
+    public void BuyItem(ItemData item, int quantity)
+    {
+        if (AddItem(item, quantity))
+            OnItemBought?.Invoke(item, quantity);
+    }
+
+    public void SellItem(ItemData item, int quantity)
+    {
+        RemoveItem(item, quantity);
+        OnItemSold?.Invoke(item, quantity);
+    }
+
     public void SwapSlots(int indexA, int indexB)
     {
         var slotA = Slots[indexA];
@@ -99,15 +109,33 @@ public class InventoryModel
         OnInventoryChanged?.Invoke();
     }
 
-    public void BuyItem(ItemData item, int quantity)
+    public InventorySlot GetSlot(int index)
     {
-        if (AddItem(item, quantity))
-            OnItemBought?.Invoke(item, quantity);
+        if (index < 0 || index >= Slots.Count) return null;
+        return Slots[index];
     }
 
-    public void SellItem(ItemData item, int quantity)
+    public int GetTotalWeight()
     {
-        RemoveItem(item, quantity);
-        OnItemSold?.Invoke(item, quantity);
+        int totalWeight = 0;
+        foreach (var slot in Slots)
+        {
+            if (!slot.IsEmpty)
+                totalWeight += slot.item.weight * slot.count;
+        }
+        return totalWeight;
     }
+
+    public int GetTotalValue()
+    {
+        int totalValue = 0;
+        foreach (var slot in Slots)
+        {
+            if (!slot.IsEmpty)
+                totalValue += slot.item.sellValue * slot.count;
+        }
+        return totalValue;
+    }
+
+    public int GetMaxWeightLimit() => maxWeightLimit;
 }

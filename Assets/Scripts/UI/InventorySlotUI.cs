@@ -1,4 +1,5 @@
 using TMPro;
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -14,12 +15,12 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IBeginDragHa
     private InventorySlot slotData;
     private int index;
 
-    private System.Func<Rarity, Sprite> getRaritySprite;
-    private System.Action<int, int> onSwapRequest;
+    private Func<Rarity, Sprite> getRaritySprite;
+    private Action<int, int> onSwapRequest;
 
-    public void Setup(InventorySlot slot, int index, System.Action<int, int> onSwapRequest, System.Func<Rarity, Sprite> getRaritySprite)
+    public void Setup(InventorySlot slot, int index, Action<int, int> onSwapRequest, Func<Rarity, Sprite> getRaritySprite)
     {
-        this.slotData = slot;
+        slotData = slot;
         this.index = index;
         this.onSwapRequest = onSwapRequest;
         this.getRaritySprite = getRaritySprite;

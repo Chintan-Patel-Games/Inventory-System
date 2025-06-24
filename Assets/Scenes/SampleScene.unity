@@ -1112,7 +1112,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a751567bfc825b44e9c6d9b38bdfbd9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inventoryView: {fileID: 881514707}
+  view: {fileID: 881514707}
+  gatherManager: {fileID: 1651983143}
   maxSlots: 24
 --- !u!1 &844164375
 GameObject:
@@ -1237,8 +1238,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 2989a4dc4115a014490b11afadbdb163, type: 3}
-  m_Type: 1
-  m_PreserveAspect: 1
+  m_Type: 0
+  m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -1269,6 +1270,8 @@ MonoBehaviour:
   slotPrefab: {fileID: 2985012257150946631, guid: fd24aa909760b0240a8dd7e9434ad906, type: 3}
   slotContainer: {fileID: 844164376}
   popupPanel: {fileID: 1320004365}
+  gatherButton: {fileID: 2144543929}
+  confirmPopupButton: {fileID: 1766545426}
   commonBG: {fileID: 21300000, guid: c1c3b8a66279725439fde8f23b28c1ca, type: 3}
   rareBG: {fileID: 21300000, guid: 3e59d475424998e42b8452df65d52148, type: 3}
   epicBG: {fileID: 21300000, guid: 7df128936abc5a947ae465ec490d85de, type: 3}
@@ -1940,8 +1943,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 2989a4dc4115a014490b11afadbdb163, type: 3}
-  m_Type: 1
-  m_PreserveAspect: 1
+  m_Type: 0
+  m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -2171,6 +2174,68 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1612760764}
   m_CullTransparentMesh: 1
+--- !u!1 &1651983141
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1651983142}
+  - component: {fileID: 1651983143}
+  m_Layer: 0
+  m_Name: GatherManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1651983142
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1651983141}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1651983143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1651983141}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0afdcfd2ed13d5b49a23788c801d5a6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gatherableItems:
+  - {fileID: 11400000, guid: 6e8727d65e3c5a64c9b582b2d2b92ffb, type: 2}
+  - {fileID: 11400000, guid: 3b767cde5c636004296b1ccbf4c3776c, type: 2}
+  - {fileID: 11400000, guid: 30d5e9e1958e9d74b9f77b406b07de20, type: 2}
+  - {fileID: 11400000, guid: c6fa88decfdb2b04db81c98f55e71e53, type: 2}
+  - {fileID: 11400000, guid: 807c6bd34a5458f47a650e6fbab6dc7e, type: 2}
+  - {fileID: 11400000, guid: 0a5a237ebf9486f40a996f2fcc011a13, type: 2}
+  - {fileID: 11400000, guid: ae3f18979be05dc4d94fbc1f74e4d1b8, type: 2}
+  - {fileID: 11400000, guid: 895e0e263c182be4c92ca13e95fc8b00, type: 2}
+  - {fileID: 11400000, guid: b67f4e80fdad9e440b74bc23efdf33c6, type: 2}
+  - {fileID: 11400000, guid: 64b8a322b4488b04ca3a2f93484fbcb8, type: 2}
+  - {fileID: 11400000, guid: fd0e4bcbffcb991478137f1b83a38b33, type: 2}
+  - {fileID: 11400000, guid: 98c9c9e68586f004bb6aba1cd7f2d1b5, type: 2}
+  - {fileID: 11400000, guid: 33352a600556ef34fab11f397ef2493c, type: 2}
+  - {fileID: 11400000, guid: 8d4665564b6e7b04ab6d65614cc4776f, type: 2}
+  - {fileID: 11400000, guid: bdd415617dba2b043ad83074ad37756a, type: 2}
+  - {fileID: 11400000, guid: 3ebc01915b8798041859044c502583f9, type: 2}
+  - {fileID: 11400000, guid: 8642d3e6eb179d546995008d0f654986, type: 2}
 --- !u!1 &1766545424
 GameObject:
   m_ObjectHideFlags: 0
@@ -2253,19 +2318,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1766545427}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 881514707}
-        m_TargetAssemblyTypeName: InventoryUI, Assembly-CSharp
-        m_MethodName: OnConfirmButtonClicked
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &1766545427
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2608,7 +2661,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &2115537373
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2723,19 +2776,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2144543930}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 881514707}
-        m_TargetAssemblyTypeName: InventoryUI, Assembly-CSharp
-        m_MethodName: OnGatherButtonClicked
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
 --- !u!114 &2144543930
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2756,7 +2797,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 2989a4dc4115a014490b11afadbdb163, type: 3}
+  m_Sprite: {fileID: 21300000, guid: baf7da08733596a40ab1f9c27902f89d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2780,6 +2821,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 519420032}
   - {fileID: 829816157}
+  - {fileID: 1651983142}
   - {fileID: 2115537374}
   - {fileID: 964795745}
   - {fileID: 1508994089}

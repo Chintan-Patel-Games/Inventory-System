@@ -13,12 +13,11 @@ MonoBehaviour:
   m_Name: Armor
   m_EditorClassIdentifier: 
   itemName: Armor
-  type: 0
+  type: 1
   icon: {fileID: 21300000, guid: 2f1eaeeaad36ee5469eff7ff158f37ba, type: 3}
   description: An Iron Armor Chestplate
-  buyValue: 2500
-  sellValue: 1000
-  weight: 100
-  rarity: 2
-  quantity: 1
+  buyValue: 160
+  sellValue: 80
+  weight: 5
+  rarity: 3
   maxStack: 1

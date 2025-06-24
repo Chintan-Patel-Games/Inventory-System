@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: Ring
   m_EditorClassIdentifier: 
   itemName: Ring
-  type: 0
+  type: 3
   icon: {fileID: 21300000, guid: 970324311431c794ca338446ea889948, type: 3}
   description: An expensive Ring
-  buyValue: 2500
-  sellValue: 1000
-  weight: 100
-  rarity: 3
+  buyValue: 300
+  sellValue: 150
+  weight: 1
+  rarity: 4
   maxStack: 1

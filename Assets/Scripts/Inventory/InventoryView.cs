@@ -1,11 +1,15 @@
-using UnityEngine;
+using System;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class InventoryView : MonoBehaviour
 {
     [SerializeField] private GameObject slotPrefab;
     [SerializeField] private Transform slotContainer;
     [SerializeField] private GameObject popupPanel;
+    [SerializeField] private Button gatherButton;
+    [SerializeField] private Button confirmPopupButton;
 
     [Header("Rarity Backgrounds")]
     [SerializeField] private Sprite commonBG;
@@ -14,11 +18,43 @@ public class InventoryView : MonoBehaviour
     [SerializeField] private Sprite legendaryBG;
 
     private List<InventorySlotUI> slotUIs = new();
-    private System.Action<int, int> onSwapRequest;
 
-    public void Initialize(System.Action<int, int> onSwapRequest) => this.onSwapRequest = onSwapRequest;
+    private Action<int, int> onSwapRequest;
+    private Action onGatherClicked;
+    private Func<int> getTotalWeight;
+    private Func<int> getTotalValue;
+    private Func<int> getmaxWeightLimit;
 
-    public Sprite GetRaritySprite(Rarity rarity)
+    public void Initialize(Action<int, int> onSwapRequest) => this.onSwapRequest = onSwapRequest;
+
+    public void LinkGathering(Action gatherAction, Func<int> getWeight, Func<int> getValue, Func<int> getWeightLimit)
+    {
+        onGatherClicked = gatherAction;
+        getTotalWeight = getWeight;
+        getTotalValue = getValue;
+        getmaxWeightLimit = getWeightLimit;
+
+        gatherButton.onClick.AddListener(OnGatherClicked);
+        confirmPopupButton.onClick.AddListener(HidePopup);
+    }
+
+    private void OnGatherClicked()
+    {
+        int totalWeight = getTotalWeight();
+        int totalValue = getTotalValue();
+
+        if (totalWeight >= getmaxWeightLimit())
+        {
+            popupPanel.SetActive(true);
+            return;
+        }
+
+        onGatherClicked?.Invoke();
+    }
+
+    private void HidePopup() => popupPanel.SetActive(false);
+
+    private Sprite GetRaritySprite(Rarity rarity)
     {
         return rarity switch
         {
