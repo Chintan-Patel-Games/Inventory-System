@@ -18,6 +18,6 @@ MonoBehaviour:
   description: An exquite looking Cloak
   buyValue: 100
   sellValue: 50
-  weight: 2
+  weight: 5
   rarity: 2
   maxStack: 1

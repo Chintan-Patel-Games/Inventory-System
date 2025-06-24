@@ -18,6 +18,6 @@ MonoBehaviour:
   description: A common Silver bar
   buyValue: 30
   sellValue: 15
-  weight: 2
+  weight: 5
   rarity: 1
   maxStack: 100

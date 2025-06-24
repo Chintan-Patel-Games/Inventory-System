@@ -18,6 +18,6 @@ MonoBehaviour:
   description: An exquistue sharp Knife
   buyValue: 40
   sellValue: 20
-  weight: 3
+  weight: 10
   rarity: 1
   maxStack: 1

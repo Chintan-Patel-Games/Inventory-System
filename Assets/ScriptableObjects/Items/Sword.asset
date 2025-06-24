@@ -18,6 +18,6 @@ MonoBehaviour:
   description: An exquistue sharp Sword
   buyValue: 100
   sellValue: 90
-  weight: 4
+  weight: 15
   rarity: 3
   maxStack: 1

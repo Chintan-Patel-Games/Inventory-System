@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,9 +8,15 @@ public class InventoryView : MonoBehaviour
 {
     [SerializeField] private GameObject slotPrefab;
     [SerializeField] private Transform slotContainer;
+
+    [Header("Gathering UI")]
     [SerializeField] private GameObject popupPanel;
     [SerializeField] private Button gatherButton;
     [SerializeField] private Button confirmPopupButton;
+
+    [Header("Stats UI")]
+    [SerializeField] private TMP_Text totalWeightText;
+    [SerializeField] private TMP_Text totalValueText;
 
     [Header("Rarity Backgrounds")]
     [SerializeField] private Sprite commonBG;
@@ -27,12 +34,12 @@ public class InventoryView : MonoBehaviour
 
     public void Initialize(Action<int, int> onSwapRequest) => this.onSwapRequest = onSwapRequest;
 
-    public void LinkGathering(Action gatherAction, Func<int> getWeight, Func<int> getValue, Func<int> getWeightLimit)
+    public void LinkGathering(Action onGatherClicked, Func<int> getTotalWeight, Func<int> getTotalValue, Func<int> getmaxWeightLimit)
     {
-        onGatherClicked = gatherAction;
-        getTotalWeight = getWeight;
-        getTotalValue = getValue;
-        getmaxWeightLimit = getWeightLimit;
+        this.onGatherClicked = onGatherClicked;
+        this.getTotalWeight = getTotalWeight;
+        this.getTotalValue = getTotalValue;
+        this.getmaxWeightLimit = getmaxWeightLimit;
 
         gatherButton.onClick.AddListener(OnGatherClicked);
         confirmPopupButton.onClick.AddListener(HidePopup);
@@ -45,11 +52,22 @@ public class InventoryView : MonoBehaviour
 
         if (totalWeight >= getmaxWeightLimit())
         {
-            popupPanel.SetActive(true);
+            ShowPopup("You cannot carry more weight!");
             return;
         }
 
         onGatherClicked?.Invoke();
+    }
+
+    public void ShowPopup(string message)
+    {
+        TMP_Text popupText = popupPanel.GetComponentInChildren<TMP_Text>();
+
+        if (popupText != null)
+        {
+            popupText.text = message;
+            popupPanel.SetActive(true);
+        }
     }
 
     private void HidePopup() => popupPanel.SetActive(false);
@@ -84,11 +102,24 @@ public class InventoryView : MonoBehaviour
 
             slotUIs.Add(slotUI);
         }
+
+        UpdateStatsUI();
     }
 
     public void RefreshAllSlots()
     {
         foreach (var slotUI in slotUIs)
             slotUI.UpdateSlot();
+
+        UpdateStatsUI();
+    }
+
+    private void UpdateStatsUI()
+    {
+        if (getTotalWeight != null && getmaxWeightLimit != null)
+            totalWeightText.text = $"Weight {getTotalWeight()} / {getmaxWeightLimit()}";
+
+        if (getTotalValue != null)
+            totalValueText.text = $"Value {getTotalValue()}";
     }
 }

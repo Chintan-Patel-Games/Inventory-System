@@ -6,24 +6,25 @@ public class InventoryModel
 {
     public List<InventorySlot> Slots { get; private set; }
     public int MaxSlotCount { get; private set; }
-    private const int maxWeightLimit = 100;
+    public int MaxWeightLimit { get; private set; }
 
     public event Action<ItemData, int> OnItemBought;
     public event Action<ItemData, int> OnItemSold;
     public event Action OnInventoryChanged;
 
-    public InventoryModel(int slotCount)
+    public InventoryModel(int slotCount, int maxWeightLimit)
     {
         MaxSlotCount = slotCount;
+        MaxWeightLimit = maxWeightLimit;
         Slots = new List<InventorySlot>(slotCount);
+
         for (int i = 0; i < slotCount; i++)
             Slots.Add(new InventorySlot());
     }
 
     public bool AddItem(ItemData item, int count = 1)
     {
-        int originalCount = count;
-        bool changed = false;
+        bool inventoryChanged = false;
 
         // Try stacking into existing slots
         foreach (var slot in Slots)
@@ -34,7 +35,7 @@ public class InventoryModel
                 int toAdd = Math.Min(space, count);
                 slot.count += toAdd;
                 count -= toAdd;
-                changed = true;
+                inventoryChanged = true;
 
                 if (count <= 0)
                     break;
@@ -52,7 +53,7 @@ public class InventoryModel
                     slot.item = item;
                     slot.count = toAdd;
                     count -= toAdd;
-                    changed = true;
+                    inventoryChanged = true;
 
                     if (count <= 0)
                         break;
@@ -60,7 +61,7 @@ public class InventoryModel
             }
         }
 
-        if (changed)
+        if (inventoryChanged)
             OnInventoryChanged?.Invoke();
 
         // Return true if all items were added, false if some couldn't be added
@@ -137,5 +138,5 @@ public class InventoryModel
         return totalValue;
     }
 
-    public int GetMaxWeightLimit() => maxWeightLimit;
+    public int GetMaxWeightLimit() => MaxWeightLimit;
 }

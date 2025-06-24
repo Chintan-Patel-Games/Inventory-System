@@ -11,11 +11,11 @@ public class GatherManager : MonoBehaviour
         float rarityChance = totalValue switch
         {
             <= 100 => Random.Range(0f, 0.2f),
-            <= 300 => Random.Range(0.2f, 0.4f),
-            <= 600 => Random.Range(0.4f, 0.7f),
-            <= 800 => Random.Range(0.7f, 0.9f),
-            <= 1000 => Random.Range(0.9f, 1.0f),
-            _ => Random.Range(0f, 0.2f)
+            <= 500 => Random.Range(0f, 0.4f),
+            <= 1000 => Random.Range(0f, 0.7f),
+            <= 2500 => Random.Range(0f, 0.9f),
+            <= 5000 => Random.Range(0f, 1.0f),
+            _ => Random.Range(0.85f, 1.0f)
         };
 
         // 2. Decide rarity from chance
@@ -26,7 +26,7 @@ public class GatherManager : MonoBehaviour
             < 0.7f => Rarity.Rare,
             < 0.9f => Rarity.Epic,
             < 1.0f => Rarity.Legendary,
-            _ => Rarity.VeryCommon
+            _ => Rarity.Legendary
         };
 
         // 3. Manually filter matching rarity items

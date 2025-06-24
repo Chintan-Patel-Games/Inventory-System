@@ -137,6 +137,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ff3067a4411f864abf4d4ef673a5741, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  slotBackground: {fileID: 0}
   rarityBG: {fileID: 6807599098732697703}
   icon: {fileID: 6590473611561824545}
   countText: {fileID: 5180179804865791807}
@@ -298,7 +299,7 @@ GameObject:
   - component: {fileID: 6517743617975545156}
   - component: {fileID: 6807599098732697703}
   m_Layer: 5
-  m_Name: Bg_img
+  m_Name: Rarity_Bg_img
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
