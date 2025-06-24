@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05e002e0134494d4792400827db63143, type: 3}
-  m_Name: Helmet
+  m_Name: Necklace
   m_EditorClassIdentifier: 
-  itemName: Helmet
-  type: 1
-  icon: {fileID: 21300000, guid: fd6e4fc32c78509458fc45ea4a478ba8, type: 3}
-  description: An Iron Helmet
-  buyValue: 80
-  sellValue: 40
-  weight: 3
-  rarity: 2
+  itemName: Necklace
+  type: 3
+  icon: {fileID: 21300000, guid: 0e123cfdc54a3ca4684816a34167a566, type: 3}
+  description: An expensive Necklace
+  buyValue: 200
+  sellValue: 100
+  weight: 1
+  rarity: 3
   maxStack: 1

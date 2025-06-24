@@ -16,9 +16,8 @@ MonoBehaviour:
   type: 2
   icon: {fileID: 21300000, guid: 6270d46c6c1104b448fb5bac5bede74d, type: 3}
   description: A very common food source to replenis your health
-  buyValue: 10
-  sellValue: 1
+  buyValue: 6
+  sellValue: 3
   weight: 1
   rarity: 0
-  quantity: 100
-  maxStack: 999
+  maxStack: 100

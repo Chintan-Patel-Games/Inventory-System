@@ -16,9 +16,8 @@ MonoBehaviour:
   type: 0
   icon: {fileID: 21300000, guid: 65c59ccc59b5690458cb9e5324edc5dc, type: 3}
   description: A very common wood log
-  buyValue: 50
-  sellValue: 20
-  weight: 100
-  rarity: 1
-  quantity: 100
-  maxStack: 999
+  buyValue: 8
+  sellValue: 4
+  weight: 2
+  rarity: 0
+  maxStack: 100
