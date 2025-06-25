@@ -1,29 +1,32 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class InventoryModel
 {
     public List<InventorySlot> Slots { get; private set; }
     public int MaxSlotCount { get; private set; }
-    private const int maxWeightLimit = 100;
+    public int MaxWeightLimit { get; private set; }
 
     public event Action<ItemData, int> OnItemBought;
     public event Action<ItemData, int> OnItemSold;
     public event Action OnInventoryChanged;
 
-    public InventoryModel(int slotCount)
+    public InventoryModel(int slotCount, int maxWeightLimit)
     {
         MaxSlotCount = slotCount;
+        MaxWeightLimit = maxWeightLimit;
         Slots = new List<InventorySlot>(slotCount);
+
         for (int i = 0; i < slotCount; i++)
             Slots.Add(new InventorySlot());
     }
 
     public bool AddItem(ItemData item, int count = 1)
     {
-        int originalCount = count;
-        bool changed = false;
+        if (item == null || count <= 0)
+            return false;
+
+        bool inventoryChanged = false;
 
         // Try stacking into existing slots
         foreach (var slot in Slots)
@@ -34,7 +37,7 @@ public class InventoryModel
                 int toAdd = Math.Min(space, count);
                 slot.count += toAdd;
                 count -= toAdd;
-                changed = true;
+                inventoryChanged = true;
 
                 if (count <= 0)
                     break;
@@ -52,7 +55,7 @@ public class InventoryModel
                     slot.item = item;
                     slot.count = toAdd;
                     count -= toAdd;
-                    changed = true;
+                    inventoryChanged = true;
 
                     if (count <= 0)
                         break;
@@ -60,7 +63,7 @@ public class InventoryModel
             }
         }
 
-        if (changed)
+        if (inventoryChanged)
             OnInventoryChanged?.Invoke();
 
         // Return true if all items were added, false if some couldn't be added
@@ -69,9 +72,12 @@ public class InventoryModel
 
     public void RemoveItem(ItemData item, int count = 1)
     {
+        if (item == null || count <= 0) return;
+
         for (int i = 0; i < Slots.Count && count > 0; i++)
         {
-            if (Slots[i].item == item)
+            var slot = Slots[i];
+            if (slot.item == item)
             {
                 int remove = Math.Min(count, Slots[i].count);
                 Slots[i].count -= remove;
@@ -99,6 +105,9 @@ public class InventoryModel
 
     public void SwapSlots(int indexA, int indexB)
     {
+        if (!IsValidIndex(indexA) || !IsValidIndex(indexB) || indexA == indexB)
+            return;
+
         var slotA = Slots[indexA];
         var slotB = Slots[indexB];
 
@@ -109,11 +118,7 @@ public class InventoryModel
         OnInventoryChanged?.Invoke();
     }
 
-    public InventorySlot GetSlot(int index)
-    {
-        if (index < 0 || index >= Slots.Count) return null;
-        return Slots[index];
-    }
+    public InventorySlot GetSlot(int index) => IsValidIndex(index) ? Slots[index] : null;
 
     public int GetTotalWeight()
     {
@@ -137,5 +142,7 @@ public class InventoryModel
         return totalValue;
     }
 
-    public int GetMaxWeightLimit() => maxWeightLimit;
+    public int GetMaxWeightLimit() => MaxWeightLimit;
+
+    private bool IsValidIndex(int index) => index >= 0 && index < Slots.Count;
 }

@@ -5,7 +5,8 @@ public class InventoryController : MonoBehaviour
 {
     [SerializeField] private InventoryView view;
     [SerializeField] private GatherManager gatherManager;
-    [SerializeField] private int maxSlots = 24;
+    [SerializeField] private int maxSlots = 30;
+    [SerializeField] private int maxWeightLimit = 500;
 
     private InventoryModel model;
 
@@ -23,26 +24,46 @@ public class InventoryController : MonoBehaviour
         model.OnItemSold += (item, quantity) => OnItemSold?.Invoke(item, quantity);
     }
 
-    private void InitializeModel() => model = new InventoryModel(maxSlots);
+    private void InitializeModel() => model = new InventoryModel(maxSlots, maxWeightLimit);
 
     private void InitializeView()
     {
         view.Initialize(SwapSlots);
-        view.LinkGathering(GatherItem, GetTotalWeight, GetTotalValue, GetmaxWeightLimit);
+        view.LinkGathering(TryGatherItem, GetTotalWeight, GetTotalValue, GetMaxWeightLimit);
         view.RefreshUI(model.Slots);
     }
 
     public void RefreshAllSlots() => view.RefreshAllSlots();
 
-    // Public calls from external systems
-    public void GatherItem()
+    public void TryGatherItem()
     {
-        var item = gatherManager.GetRandomItemBasedOnValue(GetTotalValue(), out int quantity);
-        if (item != null)
-            AddItem(item, quantity);
+        ItemData item = gatherManager.GetRandomItemBasedOnValue(GetTotalValue(), out int quantity);
+        if (item == null) return;
+
+        int stackSize = item.maxStack >= 10 ? 10 : 1;
+        int totalWeightIfAdded = GetTotalWeight() + (item.weight * stackSize);
+
+        if (totalWeightIfAdded > GetMaxWeightLimit())
+        {
+            view.ShowPopup(UIConstants.MAXWEIGHTLIMITREACHED_POPUP);
+            return;
+        }
+
+        bool added = AddItem(item, stackSize);
+        if (!added)
+            view.ShowPopup(UIConstants.NOAVAILABLESLOTS_POPUP);
     }
 
-    public void AddItem(ItemData item, int count = 1) => model.AddItem(item, count);
+    public bool AddItem(ItemData item, int count = 1)
+    {
+        if (item == null) return false;
+
+        bool success = model.AddItem(item, count);
+
+        if (!success) view.ShowPopup(UIConstants.NOAVAILABLESLOTS_POPUP);
+
+        return success;
+    }
 
     public void RemoveItem(ItemData item, int count = 1) => model.RemoveItem(item, count);
 
@@ -58,5 +79,5 @@ public class InventoryController : MonoBehaviour
 
     public int GetTotalValue() => model.GetTotalValue();
 
-    public int GetmaxWeightLimit() => model.GetMaxWeightLimit();
+    public int GetMaxWeightLimit() => model.GetMaxWeightLimit();
 }
