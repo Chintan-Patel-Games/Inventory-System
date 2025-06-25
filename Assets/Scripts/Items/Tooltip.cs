@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class Tooltip : MonoBehaviour
 {
-    public static Tooltip Instance;
+    public static Tooltip Instance { get; private set; }
 
     [Header("References")]
     [SerializeField] private GameObject panel;
@@ -19,6 +19,9 @@ public class Tooltip : MonoBehaviour
     [SerializeField] private TMP_Text weightText;
     [SerializeField] private TMP_Text maxStackText;
 
+    private RectTransform tooltipRect;
+    private RectTransform canvasRect;
+
     private void Awake()
     {
         if (Instance == null)
@@ -26,45 +29,41 @@ public class Tooltip : MonoBehaviour
         else
             Destroy(gameObject);
 
+        tooltipRect = panel.GetComponent<RectTransform>();
+        canvasRect = GetComponentInParent<Canvas>()?.GetComponent<RectTransform>();
+
         panel.SetActive(false);
     }
 
     private void Update()
     {
-        if (panel.activeSelf)
-        {
-            Vector2 localMousePos;
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                transform.parent.GetComponent<RectTransform>(),
-                Input.mousePosition,
-                null,
-                out localMousePos
-            );
+        if (!panel.activeSelf || canvasRect == null)
+            return;
 
-            // Top-left alignment (no offset)
-            RectTransform tooltipRect = panel.GetComponent<RectTransform>();
-            Vector2 size = tooltipRect.sizeDelta;
+        Vector2 localMousePos;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, Input.mousePosition, null, out localMousePos);
 
-            // Move the panel so its top-left corner is at the cursor
-            Vector2 anchoredPos = localMousePos + new Vector2(size.x * 0.5f, -size.y * 0.5f);
-            tooltipRect.anchoredPosition = anchoredPos;
-        }
+        // Position top-left corner at mouse pointer
+        Vector2 size = tooltipRect.sizeDelta;
+        tooltipRect.anchoredPosition = localMousePos + new Vector2(size.x * 0.5f, -size.y * 0.5f);
     }
 
     public void Show(ItemData item, Sprite raritySprite)
     {
+        if (item == null) return;
+
         itemIcon.sprite = item.icon;
         rarityBG.sprite = raritySprite;
         rarityBG.color = raritySprite == null ? new Color(1f, 1f, 1f, 0f) : Color.white;
 
-        nameText.text = $"Item : {item.itemName}";
-        typeText.text = $"Type : {item.type}";
-        rarityText.text = $"Rarity : {item.rarity}";
-        descriptionText.text = $"Description : {item.description}";
-        buyValueText.text = $"Buy Value : {item.buyValue}";
-        sellValueText.text = $"Sell Value : {item.sellValue}";
-        weightText.text = $"Weight : {item.weight}";
-        maxStackText.text = $"Max Stack : {item.maxStack}";
+        nameText.text = UIConstants.ITEM_LABEL + item.itemName;
+        typeText.text = UIConstants.TYPE_LABEL + item.type;
+        rarityText.text = UIConstants.RARITY_LABEL + item.rarity;
+        descriptionText.text = UIConstants.DESCRIPTION_LABEL + item.description;
+        buyValueText.text = UIConstants.BUY_VALUE_LABEL + item.buyValue;
+        sellValueText.text = UIConstants.SELL_VALUE_LABEL + item.sellValue;
+        weightText.text = UIConstants.WEIGHT_LABEL + item.weight;
+        maxStackText.text = UIConstants.MAX_STACK_LABEL + item.maxStack;
 
         panel.SetActive(true);
     }

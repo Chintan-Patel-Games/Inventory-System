@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Silver
   type: 0
-  icon: {fileID: 21300000, guid: 3e4fcc84a0ac95b429c56452575f6021, type: 3}
   description: A common Silver bar
+  icon: {fileID: 21300000, guid: 3e4fcc84a0ac95b429c56452575f6021, type: 3}
   buyValue: 30
   sellValue: 15
-  weight: 5
+  weight: 2
   rarity: 1
   maxStack: 100

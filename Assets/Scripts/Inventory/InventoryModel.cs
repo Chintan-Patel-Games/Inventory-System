@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class InventoryModel
 {
@@ -24,6 +23,9 @@ public class InventoryModel
 
     public bool AddItem(ItemData item, int count = 1)
     {
+        if (item == null || count <= 0)
+            return false;
+
         bool inventoryChanged = false;
 
         // Try stacking into existing slots
@@ -70,9 +72,12 @@ public class InventoryModel
 
     public void RemoveItem(ItemData item, int count = 1)
     {
+        if (item == null || count <= 0) return;
+
         for (int i = 0; i < Slots.Count && count > 0; i++)
         {
-            if (Slots[i].item == item)
+            var slot = Slots[i];
+            if (slot.item == item)
             {
                 int remove = Math.Min(count, Slots[i].count);
                 Slots[i].count -= remove;
@@ -100,6 +105,9 @@ public class InventoryModel
 
     public void SwapSlots(int indexA, int indexB)
     {
+        if (!IsValidIndex(indexA) || !IsValidIndex(indexB) || indexA == indexB)
+            return;
+
         var slotA = Slots[indexA];
         var slotB = Slots[indexB];
 
@@ -110,11 +118,7 @@ public class InventoryModel
         OnInventoryChanged?.Invoke();
     }
 
-    public InventorySlot GetSlot(int index)
-    {
-        if (index < 0 || index >= Slots.Count) return null;
-        return Slots[index];
-    }
+    public InventorySlot GetSlot(int index) => IsValidIndex(index) ? Slots[index] : null;
 
     public int GetTotalWeight()
     {
@@ -139,4 +143,6 @@ public class InventoryModel
     }
 
     public int GetMaxWeightLimit() => MaxWeightLimit;
+
+    private bool IsValidIndex(int index) => index >= 0 && index < Slots.Count;
 }
