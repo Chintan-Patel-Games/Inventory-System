@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 
-public class InventoryModel
+public class InventoryModel : ItemContainerBase
 {
-    public List<InventorySlot> Slots { get; private set; }
     public int MaxSlotCount { get; private set; }
     public int MaxWeightLimit { get; private set; }
 
@@ -15,10 +14,10 @@ public class InventoryModel
     {
         MaxSlotCount = slotCount;
         MaxWeightLimit = maxWeightLimit;
-        Slots = new List<InventorySlot>(slotCount);
+        slots = new List<ItemSlot>(slotCount);
 
         for (int i = 0; i < slotCount; i++)
-            Slots.Add(new InventorySlot());
+            slots.Add(new ItemSlot());
     }
 
     public bool AddItem(ItemData item, int count = 1)
@@ -29,7 +28,7 @@ public class InventoryModel
         bool inventoryChanged = false;
 
         // Try stacking into existing slots
-        foreach (var slot in Slots)
+        foreach (var slot in slots)
         {
             if (slot.item == item && slot.count < item.maxStack)
             {
@@ -47,7 +46,7 @@ public class InventoryModel
         // Try filling empty slots
         if (count > 0)
         {
-            foreach (var slot in Slots)
+            foreach (var slot in slots)
             {
                 if (slot.IsEmpty)
                 {
@@ -74,17 +73,17 @@ public class InventoryModel
     {
         if (item == null || count <= 0) return;
 
-        for (int i = 0; i < Slots.Count && count > 0; i++)
+        for (int i = 0; i < slots.Count && count > 0; i++)
         {
-            var slot = Slots[i];
+            var slot = slots[i];
             if (slot.item == item)
             {
-                int remove = Math.Min(count, Slots[i].count);
-                Slots[i].count -= remove;
+                int remove = Math.Min(count, slots[i].count);
+                slots[i].count -= remove;
                 count -= remove;
 
-                if (Slots[i].count <= 0)
-                    Slots[i].Clear();
+                if (slots[i].count <= 0)
+                    slots[i].Clear();
             }
         }
 
@@ -108,8 +107,8 @@ public class InventoryModel
         if (!IsValidIndex(indexA) || !IsValidIndex(indexB) || indexA == indexB)
             return;
 
-        var slotA = Slots[indexA];
-        var slotB = Slots[indexB];
+        var slotA = slots[indexA];
+        var slotB = slots[indexB];
 
         // Swap item and count, not the slot reference
         (slotA.item, slotB.item) = (slotB.item, slotA.item);
@@ -118,12 +117,10 @@ public class InventoryModel
         OnInventoryChanged?.Invoke();
     }
 
-    public InventorySlot GetSlot(int index) => IsValidIndex(index) ? Slots[index] : null;
-
     public int GetTotalWeight()
     {
         int totalWeight = 0;
-        foreach (var slot in Slots)
+        foreach (var slot in slots)
         {
             if (!slot.IsEmpty)
                 totalWeight += slot.item.weight * slot.count;
@@ -134,7 +131,7 @@ public class InventoryModel
     public int GetTotalValue()
     {
         int totalValue = 0;
-        foreach (var slot in Slots)
+        foreach (var slot in slots)
         {
             if (!slot.IsEmpty)
                 totalValue += slot.item.sellValue * slot.count;
@@ -143,6 +140,4 @@ public class InventoryModel
     }
 
     public int GetMaxWeightLimit() => MaxWeightLimit;
-
-    private bool IsValidIndex(int index) => index >= 0 && index < Slots.Count;
 }

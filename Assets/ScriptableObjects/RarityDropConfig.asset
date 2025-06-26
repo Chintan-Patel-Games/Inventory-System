@@ -12,5 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e57132322f00c6c4aa49e8caecb94ae0, type: 3}
   m_Name: RarityDropConfig
   m_EditorClassIdentifier: 
-  valueThresholds: []
-  rarityChances: []
+  valueThresholds:
+  - valueCap: 500
+    chanceRange: {x: 0, y: 0.2}
+  - valueCap: 1000
+    chanceRange: {x: 0, y: 0.4}
+  - valueCap: 2500
+    chanceRange: {x: 0, y: 0.7}
+  - valueCap: 5000
+    chanceRange: {x: 0, y: 0.9}
+  - valueCap: 10000
+    chanceRange: {x: 0, y: 1}
+  rarityChances:
+  - rarity: 0
+    maxChance: 0.4
+  - rarity: 1
+    maxChance: 0.65
+  - rarity: 2
+    maxChance: 0.85
+  - rarity: 3
+    maxChance: 0.97
+  - rarity: 4
+    maxChance: 1

@@ -1,4 +1,3 @@
-using GDS.Basic.Views;
 using System;
 using System.Collections;
 using TMPro;
@@ -6,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [Header("UI References")]
     [SerializeField] private Image slotBackground; // Reference to Bg_Slot_img
@@ -14,23 +13,26 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     [SerializeField] private Image icon;           // Item image
     [SerializeField] private TMP_Text countText;   // Quantity text
 
+    [Header("Rarity Backgrounds")]
+    [SerializeField] private Sprite commonBG;
+    [SerializeField] private Sprite rareBG;
+    [SerializeField] private Sprite epicBG;
+    [SerializeField] private Sprite legendaryBG;
+
     private CanvasGroup canvasGroup;
     private GameObject dragIconObject;
-    private InventorySlot slotData;
+    private ItemSlot slotData;
     private int index;
     
     private Coroutine tooltipCoroutine;
     private const float tooltipDelay = 1f; // seconds
-
-    private Func<Rarity, Sprite> getRaritySprite;
     private Action<int, int> onSwapRequest;
 
-    public void Setup(InventorySlot slot, int index, Action<int, int> onSwapRequest, Func<Rarity, Sprite> getRaritySprite)
+    public void Setup(ItemSlot slot, int index, Action<int, int> onSwapRequest)
     {
         slotData = slot;
         this.index = index;
         this.onSwapRequest = onSwapRequest;
-        this.getRaritySprite = getRaritySprite;
 
         canvasGroup = GetComponent<CanvasGroup>();
         UpdateSlot();
@@ -42,7 +44,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         {
             icon.sprite = slotData.item.icon;
             icon.gameObject.SetActive(true);
-            countText.text = slotData.count > 1 ? slotData.count.ToString() : "";
+            countText.text = slotData.count > 1 ? slotData.count.ToString() : string.Empty;
 
             Sprite raritySprite = GetRaritySpriteForItem(slotData.item);
             rarityBG.sprite = raritySprite;
@@ -55,26 +57,36 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
             rarityBG.color = new Color(1f, 1f, 1f, 0f); // faded
         }
     }
+    public ItemSlot GetSlot() => slotData;
 
-    private Sprite GetRaritySpriteForItem(ItemData item)
+    private Sprite GetRaritySprite(Rarity rarity)
     {
-        return (item == null || item.rarity == Rarity.VeryCommon) ? null : getRaritySprite?.Invoke(item.rarity);
+        return rarity switch
+        {
+            Rarity.Common => commonBG,
+            Rarity.Rare => rareBG,
+            Rarity.Epic => epicBG,
+            Rarity.Legendary => legendaryBG,
+            _ => null
+        };
     }
+
+    public Sprite GetRaritySpriteForItem(ItemData item) => (item == null || item.rarity == Rarity.VeryCommon) ? null : GetRaritySprite(item.rarity);
 
     private IEnumerator ShowTooltipWithDelay()
     {
         yield return new WaitForSeconds(tooltipDelay);
 
-        if (slotData.item != null && Tooltip.Instance != null)
+        if (slotData.item != null && TooltipUI.Instance != null)
         {
             Sprite raritySprite = GetRaritySpriteForItem(slotData.item);
-            Tooltip.Instance.Show(slotData.item, raritySprite);
+            TooltipUI.Instance.Show(slotData.item, raritySprite);
         }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (slotData.item != null && Tooltip.Instance != null)
+        if (slotData.item != null && TooltipUI.Instance != null)
             tooltipCoroutine = StartCoroutine(ShowTooltipWithDelay());
     }
 
@@ -86,7 +98,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
             tooltipCoroutine = null;
         }
 
-        Tooltip.Instance?.Hide();
+        TooltipUI.Instance?.Hide();
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -111,9 +123,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         dragRect.position = Input.mousePosition;
 
         if (slotData.count > 1)
-        {
             CreateDragCountText(dragIconObject.transform, slotData.count);
-        }
     }
     private void CreateDragCountText(Transform parent, int count)
     {
@@ -150,7 +160,7 @@ public class InventorySlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         countText.enabled = true;
 
         GameObject hovered = eventData.pointerEnter;
-        InventorySlotUI target = hovered?.GetComponentInParent<InventorySlotUI>();
+        ItemSlotUI target = hovered?.GetComponentInParent<ItemSlotUI>();
 
         if (target != null && target.index != index)
             onSwapRequest?.Invoke(index, target.index);

@@ -2,9 +2,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Tooltip : MonoBehaviour
+public class TooltipUI : MonoBehaviour
 {
-    public static Tooltip Instance { get; private set; }
+    public static TooltipUI Instance { get; private set; }
 
     [Header("References")]
     [SerializeField] private GameObject panel;
@@ -56,14 +56,14 @@ public class Tooltip : MonoBehaviour
         rarityBG.sprite = raritySprite;
         rarityBG.color = raritySprite == null ? new Color(1f, 1f, 1f, 0f) : Color.white;
 
-        nameText.text = UIConstants.ITEM_LABEL + item.itemName;
-        typeText.text = UIConstants.TYPE_LABEL + item.type;
-        rarityText.text = UIConstants.RARITY_LABEL + item.rarity;
-        descriptionText.text = UIConstants.DESCRIPTION_LABEL + item.description;
-        buyValueText.text = UIConstants.BUY_VALUE_LABEL + item.buyValue;
-        sellValueText.text = UIConstants.SELL_VALUE_LABEL + item.sellValue;
-        weightText.text = UIConstants.WEIGHT_LABEL + item.weight;
-        maxStackText.text = UIConstants.MAX_STACK_LABEL + item.maxStack;
+        nameText.text = StringConstants.ITEM_LABEL + item.itemName;
+        typeText.text = StringConstants.TYPE_LABEL + item.type;
+        rarityText.text = StringConstants.RARITY_LABEL + item.rarity;
+        descriptionText.text = StringConstants.DESCRIPTION_LABEL + item.description;
+        buyValueText.text = StringConstants.BUY_VALUE_LABEL + item.buyValue;
+        sellValueText.text = StringConstants.SELL_VALUE_LABEL + item.sellValue;
+        weightText.text = StringConstants.WEIGHT_LABEL + item.weight;
+        maxStackText.text = StringConstants.MAX_STACK_LABEL + item.maxStack;
 
         panel.SetActive(true);
     }

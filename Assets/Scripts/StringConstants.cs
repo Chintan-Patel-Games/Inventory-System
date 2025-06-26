@@ -1,4 +1,4 @@
-public static class UIConstants
+public static class StringConstants
 {
     // Tooltip Labels
     public const string ITEM_LABEL = "Item : ";

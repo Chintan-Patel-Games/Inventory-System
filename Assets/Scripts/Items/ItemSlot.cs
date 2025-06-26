@@ -1,7 +1,5 @@
-using UnityEngine;
-
 [System.Serializable]
-public class InventorySlot
+public class ItemSlot
 {
     public ItemData item;
     public int count;
