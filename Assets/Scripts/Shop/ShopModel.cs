@@ -6,6 +6,8 @@ public class ShopModel : ItemContainerBase
 
     public void RemoveItem(ItemData item, int quantity = 1)
     {
+        if (item == null || quantity <= 0) return;
+
         foreach (var slot in slots)
         {
             if (slot.item == item)

@@ -26,16 +26,38 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     
     private Coroutine tooltipCoroutine;
     private const float tooltipDelay = 1f; // seconds
+
+    // Inventory Delegates
     private Action<int, int> onSwapRequest;
 
-    public void Setup(ItemSlot slot, int index, Action<int, int> onSwapRequest)
+    // Shop Delegates
+    private Action<ItemSlot> onBuyRequest;
+    private Action<ItemSlot> onSellRequest;
+
+    public void InventorySetup(ItemSlot slot, int index, Action<int, int> onSwapRequest, Action<ItemSlot> onSellRequest)
     {
         slotData = slot;
+        slotData.owner = SlotOwner.Inventory; // Set owner to Inventory
         this.index = index;
         this.onSwapRequest = onSwapRequest;
+        this.onSellRequest = onSellRequest;
 
         canvasGroup = GetComponent<CanvasGroup>();
         UpdateSlot();
+    }
+
+    public void ShopSetup(ItemSlot slot, Action<ItemSlot> onBuyRequest, Action<ItemSlot> onSellRequest)
+    {
+        slotData = slot;
+        slotData.owner = SlotOwner.Shop; // Set owner to Shop
+        index = -1; // Not used for shop slots
+        onSwapRequest = null;
+
+        canvasGroup = GetComponent<CanvasGroup>();
+        UpdateSlot();
+
+        this.onBuyRequest = onBuyRequest;
+        this.onSellRequest = onSellRequest;
     }
 
     public void UpdateSlot()
@@ -57,6 +79,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             rarityBG.color = new Color(1f, 1f, 1f, 0f); // faded
         }
     }
+
     public ItemSlot GetSlot() => slotData;
 
     private Sprite GetRaritySprite(Rarity rarity)
@@ -160,9 +183,37 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         countText.enabled = true;
 
         GameObject hovered = eventData.pointerEnter;
-        ItemSlotUI target = hovered?.GetComponentInParent<ItemSlotUI>();
 
-        if (target != null && target.index != index)
-            onSwapRequest?.Invoke(index, target.index);
+        if (hovered == null)
+        {
+            UpdateSlot();
+            return;
+        }
+
+        ItemSlotUI targetSlot = hovered.GetComponentInParent<ItemSlotUI>();
+
+        if (targetSlot != null && targetSlot != this)
+        {
+            if (slotData.owner == SlotOwner.Inventory && targetSlot.slotData.owner == SlotOwner.Inventory)
+            {
+                onSwapRequest?.Invoke(index, targetSlot.index);
+                return;
+            }
+
+            if (slotData.owner == SlotOwner.Shop && targetSlot.slotData.owner == SlotOwner.Inventory)
+            {
+                onBuyRequest?.Invoke(slotData);
+                return;
+            }
+
+            if (slotData.owner == SlotOwner.Inventory && targetSlot.slotData.owner == SlotOwner.Shop)
+            {
+                onSellRequest?.Invoke(slotData);
+                return;
+            }
+        }
+
+        // Fallback
+        UpdateSlot();
     }
 }

@@ -21,12 +21,17 @@ public class InventoryView : MonoBehaviour
 
     // Delegates
     private Action<int, int> onSwapRequest;
+    private Action<ItemSlot> onSellRequest;
     private Action onGatherClicked;
     private Func<int> getTotalWeight;
     private Func<int> getTotalValue;
     private Func<int> getMaxWeightLimit;
 
-    public void Initialize(Action<int, int> onSwapRequest) => this.onSwapRequest = onSwapRequest;
+    public void Initialize(Action<int, int> onSwapRequest, Action<ItemSlot> onSellRequest)
+    {
+        this.onSwapRequest = onSwapRequest;
+        this.onSellRequest = onSellRequest;
+    }
 
     public void LinkGathering(Action onGatherClicked, Func<int> getTotalWeight, Func<int> getTotalValue, Func<int> getMaxWeightLimit)
     {
@@ -51,7 +56,7 @@ public class InventoryView : MonoBehaviour
             GameObject obj = Instantiate(slotPrefab, slotContainer);
             var slotUI = obj.GetComponent<ItemSlotUI>();
 
-            slotUI.Setup(slot, i, onSwapRequest);
+            slotUI.InventorySetup(slot, i, onSwapRequest, onSellRequest);
             slotUIs.Add(slotUI);
         }
 
@@ -75,7 +80,7 @@ public class InventoryView : MonoBehaviour
 
         if (totalWeight >= getMaxWeightLimit())
         {
-            PopupUI.Instance.Show(StringConstants.MAXWEIGHTLIMITREACHED_POPUP);
+            PopupUI.Instance.Show(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP);
             return;
         }
 

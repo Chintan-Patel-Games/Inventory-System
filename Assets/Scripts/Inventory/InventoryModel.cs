@@ -5,9 +5,6 @@ public class InventoryModel : ItemContainerBase
 {
     public int MaxSlotCount { get; private set; }
     public int MaxWeightLimit { get; private set; }
-
-    public event Action<ItemData, int> OnItemBought;
-    public event Action<ItemData, int> OnItemSold;
     public event Action OnInventoryChanged;
 
     public InventoryModel(int slotCount, int maxWeightLimit)
@@ -69,37 +66,24 @@ public class InventoryModel : ItemContainerBase
         return count == 0;
     }
 
-    public void RemoveItem(ItemData item, int count = 1)
+    public void RemoveItem(ItemData item, int quantity = 1)
     {
-        if (item == null || count <= 0) return;
+        if (item == null || quantity <= 0) return;
 
-        for (int i = 0; i < slots.Count && count > 0; i++)
+        foreach (var slot in slots)
         {
-            var slot = slots[i];
             if (slot.item == item)
             {
-                int remove = Math.Min(count, slots[i].count);
-                slots[i].count -= remove;
-                count -= remove;
+                int remove = Math.Min(quantity, slot.count);
+                slot.count -= remove;
+                quantity -= remove;
 
-                if (slots[i].count <= 0)
-                    slots[i].Clear();
+                if (slot.count <= 0)
+                    slot.Clear();
             }
         }
 
         OnInventoryChanged?.Invoke();
-    }
-
-    public void BuyItem(ItemData item, int quantity)
-    {
-        if (AddItem(item, quantity))
-            OnItemBought?.Invoke(item, quantity);
-    }
-
-    public void SellItem(ItemData item, int quantity)
-    {
-        RemoveItem(item, quantity);
-        OnItemSold?.Invoke(item, quantity);
     }
 
     public void SwapSlots(int indexA, int indexB)

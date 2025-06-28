@@ -4,10 +4,13 @@ using UnityEngine;
 
 public class ShopController : MonoBehaviour
 {
+    [Header("References")]
     [SerializeField] private ShopView view;
-    [SerializeField] private InventoryController inventoryController;
     [SerializeField] private QuantityPopupUI quantityPopup;
     [SerializeField] private CurrencyUI currencyUI;
+
+    [Header("Shop Item Generation")]
+    [SerializeField] private ItemData[] availableItems;  // Assigned via inspector
 
     private ShopModel model;
     private int playerCurrency = 1000;
@@ -17,60 +20,76 @@ public class ShopController : MonoBehaviour
 
     private void Awake()
     {
-        // Option 1: Create shop items via ScriptableObjects or predefined setup
-        List<ItemSlot> shopItems = new List<ItemSlot>{};
-
-        model = new ShopModel(shopItems);
-
-        view.Initialize(model.GetAllSlots(), TryBuyItem);
+        InitializeModel();
+        InitializeView();
     }
 
-    private void Start()
+    private void InitializeModel() => model = new ShopModel(GenerateRandomShopItems(6));
+
+    private void InitializeView() => view.Initialize(model.GetAllSlots(), TryBuyItem, TrySellItem);
+
+    private void Start() => currencyUI.SetCoins(playerCurrency);
+
+    private List<ItemSlot> GenerateRandomShopItems(int count)
     {
-        view.Initialize(model.GetAllSlots(), TryBuyItem);
-        currencyUI.SetCoins(playerCurrency);
+        List<ItemSlot> result = new();
+        HashSet<ItemData> usedItems = new();
+
+        while (result.Count < count && usedItems.Count < availableItems.Length)
+        {
+            ItemData item = availableItems[UnityEngine.Random.Range(0, availableItems.Length)];
+
+            if (item != null && !usedItems.Contains(item))
+            {
+                result.Add(new ItemSlot { item = item, count = 1 }); // count will be handled in popup
+                usedItems.Add(item);
+            }
+        }
+
+        return result;
     }
 
-    //private void OnItemBought(ItemData item, int quantity)
-    //{
-    //    model.RemoveItem(item, quantity);
-    //    view.RefreshAllSlots();
-    //}
-
-    private void TryBuyItem(ItemSlot shopSlot)
+    public void TryBuyItem(ItemSlot shopSlot)
     {
-        quantityPopup.Show(shopSlot.item, 1, shopSlot.item.maxStack, ConfirmBuy);
+        if (shopSlot == null || shopSlot.item == null || shopSlot.IsEmpty)
+            return;
+
+        quantityPopup.Show(shopSlot.item, 1, shopSlot.item.maxStack, BuyItem, isBuying: true);
     }
 
-    private void ConfirmBuy(ItemData item, int quantity)
+    private void BuyItem(ItemData item, int quantity)
     {
         int totalCost = item.buyValue * quantity;
 
         if (playerCurrency < totalCost)
         {
-            // Show "Not enough coins" popup
+            PopupUI.Instance.Show(StringConstants.NOT_ENOUGH_COINS_POPUP);
             return;
         }
 
-        bool success = inventoryController.AddItem(item, quantity);
+        OnItemBought?.Invoke(item, quantity);
 
-        if (success)
-        {
-            playerCurrency -= totalCost;
-            currencyUI.SetCoins(playerCurrency);
+        playerCurrency -= totalCost;
+        currencyUI.SetCoins(playerCurrency);
 
-            OnItemBought(item, quantity); // Call it here
-
-            // Show confirmation popup or overlay text
-        }
+        model.RemoveItem(item, quantity);
+        view.RefreshAllSlots();
     }
 
-    public void SellItem(ItemData item, int quantity)
+    public void TrySellItem(ItemSlot inventorySlot)
     {
-        inventoryController.RemoveItem(item, quantity);
+        if (inventorySlot == null || inventorySlot.item == null || inventorySlot.IsEmpty)
+            return;
+
+        quantityPopup.Show(inventorySlot.item, 1, inventorySlot.count, SellItem, isBuying: false);
+    }
+
+    private void SellItem(ItemData item, int quantity)
+    {
+        OnItemSold?.Invoke(item, quantity);
+
         int totalEarned = item.sellValue * quantity;
         playerCurrency += totalEarned;
         currencyUI.SetCoins(playerCurrency);
-        // Show confirmation popup or overlay text
     }
 }

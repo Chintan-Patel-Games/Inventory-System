@@ -9,12 +9,19 @@ public class ShopView : MonoBehaviour
 
     private List<ItemSlotUI> slotUIs = new();
 
-    private Action<ItemSlot> onSlotDragged;
+    private Action<ItemSlot> onBuyRequest;
+    private Action<ItemSlot> onSellRequest;
 
-    public void Initialize(List<ItemSlot> shopSlots, Action<ItemSlot> onSlotDragged)
+    public void Initialize(List<ItemSlot> shopSlots,Action<ItemSlot> onBuyRequest, Action<ItemSlot> onSellRequest)
     {
-        this.onSlotDragged = onSlotDragged;
+        this.onBuyRequest = onBuyRequest;
+        this.onSellRequest = onSellRequest;
 
+        RefreshUI(shopSlots);
+    }
+
+    public void RefreshUI(List<ItemSlot> shopSlots)
+    {
         foreach (Transform child in slotContainer)
             Destroy(child.gameObject);
 
@@ -23,10 +30,11 @@ public class ShopView : MonoBehaviour
         for (int i = 0; i < shopSlots.Count; i++)
         {
             var slot = shopSlots[i];
-            var obj = Instantiate(slotPrefab, slotContainer);
-            var ui = obj.GetComponent<ItemSlotUI>();
-            ui.Setup(slot, i, OnSlotDragAttempt);
-            slotUIs.Add(ui);
+            GameObject obj = Instantiate(slotPrefab, slotContainer);
+            var slotUI = obj.GetComponent<ItemSlotUI>();
+
+            slotUI.ShopSetup(slot, onBuyRequest, onSellRequest);
+            slotUIs.Add(slotUI);
         }
     }
 
@@ -34,11 +42,5 @@ public class ShopView : MonoBehaviour
     {
         foreach (var slotUI in slotUIs)
             slotUI.UpdateSlot();
-    }
-
-    private void OnSlotDragAttempt(int index, int _)
-    {
-        ItemSlot slot = slotUIs[index].GetSlot();
-        onSlotDragged?.Invoke(slot);
     }
 }
