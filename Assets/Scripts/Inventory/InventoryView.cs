@@ -11,30 +11,27 @@ public class InventoryView : MonoBehaviour
     [SerializeField] private Transform slotContainer;
 
     [Header("Gathering UI")]
-    [SerializeField] private GameObject popupPanel;
     [SerializeField] private Button gatherButton;
-    [SerializeField] private Button confirmPopupButton;
 
     [Header("Stats UI")]
     [SerializeField] private TMP_Text totalWeightText;
     [SerializeField] private TMP_Text totalValueText;
 
-    [Header("Rarity Backgrounds")]
-    [SerializeField] private Sprite commonBG;
-    [SerializeField] private Sprite rareBG;
-    [SerializeField] private Sprite epicBG;
-    [SerializeField] private Sprite legendaryBG;
-
-    private List<InventorySlotUI> slotUIs = new();
+    private List<ItemSlotUI> slotUIs = new();
 
     // Delegates
     private Action<int, int> onSwapRequest;
+    private Action<ItemSlot> onSellRequest;
     private Action onGatherClicked;
     private Func<int> getTotalWeight;
     private Func<int> getTotalValue;
     private Func<int> getMaxWeightLimit;
 
-    public void Initialize(Action<int, int> onSwapRequest) => this.onSwapRequest = onSwapRequest;
+    public void Initialize(Action<int, int> onSwapRequest, Action<ItemSlot> onSellRequest)
+    {
+        this.onSwapRequest = onSwapRequest;
+        this.onSellRequest = onSellRequest;
+    }
 
     public void LinkGathering(Action onGatherClicked, Func<int> getTotalWeight, Func<int> getTotalValue, Func<int> getMaxWeightLimit)
     {
@@ -44,10 +41,9 @@ public class InventoryView : MonoBehaviour
         this.getMaxWeightLimit = getMaxWeightLimit;
 
         gatherButton.onClick.AddListener(OnGatherClicked);
-        confirmPopupButton.onClick.AddListener(HidePopup);
     }
 
-    public void RefreshUI(List<InventorySlot> inventorySlots)
+    public void RefreshUI(List<ItemSlot> inventorySlots)
     {
         foreach (Transform child in slotContainer)
             Destroy(child.gameObject);
@@ -58,9 +54,9 @@ public class InventoryView : MonoBehaviour
         {
             var slot = inventorySlots[i];
             GameObject obj = Instantiate(slotPrefab, slotContainer);
-            var slotUI = obj.GetComponent<InventorySlotUI>();
+            var slotUI = obj.GetComponent<ItemSlotUI>();
 
-            slotUI.Setup(slot, i, onSwapRequest, GetRaritySprite);
+            slotUI.InventorySetup(slot, i, onSwapRequest, onSellRequest);
             slotUIs.Add(slotUI);
         }
 
@@ -75,26 +71,6 @@ public class InventoryView : MonoBehaviour
         UpdateStatsUI();
     }
 
-    public void ShowPopup(string message)
-    {
-        if (popupPanel != null && popupPanel.TryGetComponent(out TMP_Text popupText))
-        {
-            popupText.text = message;
-            popupPanel.SetActive(true);
-        }
-        else
-        {
-            TMP_Text childText = popupPanel?.GetComponentInChildren<TMP_Text>();
-            if (childText != null)
-            {
-                childText.text = message;
-                popupPanel.SetActive(true);
-            }
-        }
-    }
-
-    // Private Methods
-
     private void OnGatherClicked()
     {
         if (getTotalWeight == null || getMaxWeightLimit == null) return;
@@ -104,33 +80,19 @@ public class InventoryView : MonoBehaviour
 
         if (totalWeight >= getMaxWeightLimit())
         {
-            ShowPopup(UIConstants.MAXWEIGHTLIMITREACHED_POPUP);
+            PopupUI.Instance.Show(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP);
             return;
         }
 
         onGatherClicked?.Invoke();
     }
 
-    private void HidePopup() => popupPanel.SetActive(false);
-
     private void UpdateStatsUI()
     {
         if (getTotalWeight != null && getMaxWeightLimit != null)
-            totalWeightText.text = $"{UIConstants.CURRENT_WEIGHT_LABEL} {getTotalWeight()} / {getMaxWeightLimit()}";
+            totalWeightText.text = $"{StringConstants.CURRENT_WEIGHT_LABEL} {getTotalWeight()} / {getMaxWeightLimit()}";
 
         if (getTotalValue != null)
-            totalValueText.text = $"{UIConstants.CURRENT_VALUE_LABEL} {getTotalValue()}";
-    }
-
-    private Sprite GetRaritySprite(Rarity rarity)
-    {
-        return rarity switch
-        {
-            Rarity.Common => commonBG,
-            Rarity.Rare => rareBG,
-            Rarity.Epic => epicBG,
-            Rarity.Legendary => legendaryBG,
-            _ => null
-        };
+            totalValueText.text = $"{StringConstants.CURRENT_VALUE_LABEL} {getTotalValue()}";
     }
 }

@@ -5,7 +5,7 @@ public enum ItemType
     Materials,
     Weapons,
     Consumables,
-    Treasur
+    Treasure
 }
 public enum Rarity
 {

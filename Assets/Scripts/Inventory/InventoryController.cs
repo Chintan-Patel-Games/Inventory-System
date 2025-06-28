@@ -5,32 +5,31 @@ public class InventoryController : MonoBehaviour
 {
     [SerializeField] private InventoryView view;
     [SerializeField] private GatherManager gatherManager;
+    [SerializeField] private ShopController shopController;
     [SerializeField] private int maxSlots = 30;
     [SerializeField] private int maxWeightLimit = 500;
 
     private InventoryModel model;
-
-    public event Action<ItemData, int> OnItemBought;
-    public event Action<ItemData, int> OnItemSold;
 
     private void Awake()
     {
         InitializeModel();
         InitializeView();
 
-        // Subscribe to model events
         model.OnInventoryChanged += RefreshAllSlots;
-        model.OnItemBought += (item, quantity) => OnItemBought?.Invoke(item, quantity);
-        model.OnItemSold += (item, quantity) => OnItemSold?.Invoke(item, quantity);
+
+        // Subscribe to shop events
+        shopController.OnItemBought += HandleItemBought;
+        shopController.OnItemSold += HandleItemSold;
     }
 
     private void InitializeModel() => model = new InventoryModel(maxSlots, maxWeightLimit);
 
     private void InitializeView()
     {
-        view.Initialize(SwapSlots);
+        view.Initialize(SwapSlots, shopController.TrySellItem);
         view.LinkGathering(TryGatherItem, GetTotalWeight, GetTotalValue, GetMaxWeightLimit);
-        view.RefreshUI(model.Slots);
+        view.RefreshUI(model.GetAllSlots());
     }
 
     public void RefreshAllSlots() => view.RefreshAllSlots();
@@ -45,13 +44,26 @@ public class InventoryController : MonoBehaviour
 
         if (totalWeightIfAdded > GetMaxWeightLimit())
         {
-            view.ShowPopup(UIConstants.MAXWEIGHTLIMITREACHED_POPUP);
+            PopupUI.Instance.Show(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP);
             return;
         }
 
         bool added = AddItem(item, stackSize);
         if (!added)
-            view.ShowPopup(UIConstants.NOAVAILABLESLOTS_POPUP);
+            PopupUI.Instance.Show(StringConstants.INVENTORY_FULL_POPUP);
+    }
+
+    private void HandleItemBought(ItemData item, int quantity)
+    {
+        bool added = model.AddItem(item, quantity);
+
+        if (!added)
+            PopupUI.Instance.Show(StringConstants.INVENTORY_FULL_POPUP);
+    }
+
+    private void HandleItemSold(ItemData item, int quantity)
+    {
+        model.RemoveItem(item, quantity);
     }
 
     public bool AddItem(ItemData item, int count = 1)
@@ -60,20 +72,16 @@ public class InventoryController : MonoBehaviour
 
         bool success = model.AddItem(item, count);
 
-        if (!success) view.ShowPopup(UIConstants.NOAVAILABLESLOTS_POPUP);
+        if (!success) PopupUI.Instance.Show(StringConstants.INVENTORY_FULL_POPUP);
 
         return success;
     }
 
     public void RemoveItem(ItemData item, int count = 1) => model.RemoveItem(item, count);
 
-    public void BuyItem(ItemData item, int quantity) => model.BuyItem(item, quantity);
-
-    public void SellItem(ItemData item, int quantity) => model.SellItem(item, quantity);
-
     public void SwapSlots(int indexA, int indexB) => model.SwapSlots(indexA, indexB);
 
-    public InventorySlot GetSlot(int index) => model.GetSlot(index);
+    public ItemSlot GetSlot(int index) => model.GetSlot(index);
 
     public int GetTotalWeight() => model.GetTotalWeight();
 

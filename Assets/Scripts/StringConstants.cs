@@ -1,4 +1,4 @@
-public static class UIConstants
+public static class StringConstants
 {
     // Tooltip Labels
     public const string ITEM_LABEL = "Item : ";
@@ -15,6 +15,7 @@ public static class UIConstants
     public const string CURRENT_VALUE_LABEL = "Value : ";
 
     // Popup Messages
-    public const string MAXWEIGHTLIMITREACHED_POPUP = "You cannot carry more weight!";
-    public const string NOAVAILABLESLOTS_POPUP = "No available slots in inventory!";
+    public const string MAX_WEIGHT_LIMIT_REACHED_POPUP = "You cannot carry more weight!";
+    public const string INVENTORY_FULL_POPUP = "Inventory is full!";
+    public const string NOT_ENOUGH_COINS_POPUP = "Not enough coins!";
 }
