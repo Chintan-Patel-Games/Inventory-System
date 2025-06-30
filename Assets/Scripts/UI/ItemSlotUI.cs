@@ -46,18 +46,16 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         UpdateSlot();
     }
 
-    public void ShopSetup(ItemSlot slot, Action<ItemSlot> onBuyRequest, Action<ItemSlot> onSellRequest)
+    public void ShopSetup(ItemSlot slot, int index, Action<ItemSlot> onBuyRequest, Action<ItemSlot> onSellRequest)
     {
         slotData = slot;
         slotData.owner = SlotOwner.Shop; // Set owner to Shop
-        index = -1; // Not used for shop slots
-        onSwapRequest = null;
+        this.index = index;
+        this.onBuyRequest = onBuyRequest;
+        this.onSellRequest = onSellRequest;
 
         canvasGroup = GetComponent<CanvasGroup>();
         UpdateSlot();
-
-        this.onBuyRequest = onBuyRequest;
-        this.onSellRequest = onSellRequest;
     }
 
     public void UpdateSlot()
@@ -68,9 +66,8 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
             icon.gameObject.SetActive(true);
             countText.text = slotData.count > 1 ? slotData.count.ToString() : string.Empty;
 
-            Sprite raritySprite = GetRaritySpriteForItem(slotData.item);
-            rarityBG.sprite = raritySprite;
-            rarityBG.color = raritySprite == null ? new Color(1f, 1f, 1f, 0f) : Color.white;
+            rarityBG.sprite = slotData.item.rarityBg;
+            rarityBG.color = slotData.item.rarity == Rarity.VeryCommon ? new Color(1f, 1f, 1f, 0f) : Color.white;
         }
         else
         {
@@ -82,29 +79,12 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     public ItemSlot GetSlot() => slotData;
 
-    private Sprite GetRaritySprite(Rarity rarity)
-    {
-        return rarity switch
-        {
-            Rarity.Common => commonBG,
-            Rarity.Rare => rareBG,
-            Rarity.Epic => epicBG,
-            Rarity.Legendary => legendaryBG,
-            _ => null
-        };
-    }
-
-    public Sprite GetRaritySpriteForItem(ItemData item) => (item == null || item.rarity == Rarity.VeryCommon) ? null : GetRaritySprite(item.rarity);
-
     private IEnumerator ShowTooltipWithDelay()
     {
         yield return new WaitForSeconds(tooltipDelay);
 
         if (slotData.item != null && TooltipUI.Instance != null)
-        {
-            Sprite raritySprite = GetRaritySpriteForItem(slotData.item);
-            TooltipUI.Instance.Show(slotData.item, raritySprite);
-        }
+            TooltipUI.Instance.Show(slotData.item);
     }
 
     public void OnPointerEnter(PointerEventData eventData)

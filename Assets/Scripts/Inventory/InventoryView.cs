@@ -43,7 +43,7 @@ public class InventoryView : MonoBehaviour
         gatherButton.onClick.AddListener(OnGatherClicked);
     }
 
-    public void RefreshUI(List<ItemSlot> inventorySlots)
+    public void RefreshUI(IReadOnlyList<ItemSlot> inventorySlots)
     {
         foreach (Transform child in slotContainer)
             Destroy(child.gameObject);

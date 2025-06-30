@@ -25,10 +25,10 @@ public class QuantityPopupUI : MonoBehaviour
     private Action<ItemData, int> onConfirm;
     private bool isBuying;
 
-    public void Show(ItemData item, int startQty, int maxQty, Action<ItemData, int> confirmCallback, bool isBuying = true)
+    public void Show(ItemData item, int startQty, int totalQnt, int maxQty, Action<ItemData, int> confirmCallback, bool isBuying = true)
     {
         currentItem = item;
-        currentQuantity = Mathf.Clamp(startQty, 1, maxQty);
+        currentQuantity = Mathf.Clamp(startQty, totalQnt, maxQty);
         maxQuantity = maxQty;
         onConfirm = confirmCallback;
         this.isBuying = isBuying;
@@ -50,6 +50,7 @@ public class QuantityPopupUI : MonoBehaviour
     private void UpdateUI()
     {
         itemIcon.sprite = currentItem.icon;
+        rarityBG.sprite = currentItem.rarityBg;
         rarityBG.color = currentItem.rarity == Rarity.VeryCommon ? new Color(1f, 1f, 1f, 0f) : Color.white;
         nameText.text = currentItem.itemName;
         descriptionText.text = currentItem.description;

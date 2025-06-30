@@ -48,13 +48,13 @@ public class TooltipUI : MonoBehaviour
         tooltipRect.anchoredPosition = localMousePos + new Vector2(size.x * 0.5f, -size.y * 0.5f);
     }
 
-    public void Show(ItemData item, Sprite raritySprite)
+    public void Show(ItemData item)
     {
         if (item == null) return;
 
         itemIcon.sprite = item.icon;
-        rarityBG.sprite = raritySprite;
-        rarityBG.color = raritySprite == null ? new Color(1f, 1f, 1f, 0f) : Color.white;
+        rarityBG.sprite = item.rarityBg;
+        rarityBG.color = item.rarity == Rarity.VeryCommon ? new Color(1f, 1f, 1f, 0f) : Color.white;
 
         nameText.text = StringConstants.ITEM_LABEL + item.itemName;
         typeText.text = StringConstants.TYPE_LABEL + item.type;

@@ -23,6 +23,8 @@ MonoBehaviour:
     chanceRange: {x: 0, y: 0.9}
   - valueCap: 10000
     chanceRange: {x: 0, y: 1}
+  - valueCap: 15000
+    chanceRange: {x: 0.75, y: 1}
   rarityChances:
   - rarity: 0
     maxChance: 0.4

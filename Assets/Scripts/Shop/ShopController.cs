@@ -10,10 +10,9 @@ public class ShopController : MonoBehaviour
     [SerializeField] private CurrencyUI currencyUI;
 
     [Header("Shop Item Generation")]
-    [SerializeField] private ItemData[] availableItems;  // Assigned via inspector
+    [SerializeField] private ItemData[] availableItems;
 
     private ShopModel model;
-    private int playerCurrency = 1000;
 
     public event Action<ItemData, int> OnItemBought;
     public event Action<ItemData, int> OnItemSold;
@@ -26,9 +25,13 @@ public class ShopController : MonoBehaviour
 
     private void InitializeModel() => model = new ShopModel(GenerateRandomShopItems(6));
 
-    private void InitializeView() => view.Initialize(model.GetAllSlots(), TryBuyItem, TrySellItem);
+    private void InitializeView()
+    {
+        view.Initialize(TryBuyItem, TrySellItem);
+        view.RefreshUI(model.GetAllSlots());
+    }
 
-    private void Start() => currencyUI.SetCoins(playerCurrency);
+    private void Start() => currencyUI.SetCoins(model.PlayerCoins);
 
     private List<ItemSlot> GenerateRandomShopItems(int count)
     {
@@ -54,26 +57,22 @@ public class ShopController : MonoBehaviour
         if (shopSlot == null || shopSlot.item == null || shopSlot.IsEmpty)
             return;
 
-        quantityPopup.Show(shopSlot.item, 1, shopSlot.item.maxStack, BuyItem, isBuying: true);
+        quantityPopup.Show(shopSlot.item, 1, 1, shopSlot.item.maxStack, BuyItem, isBuying: true);
     }
 
     private void BuyItem(ItemData item, int quantity)
     {
-        int totalCost = item.buyValue * quantity;
-
-        if (playerCurrency < totalCost)
+        if (!model.CanBuy(item, quantity))
         {
             PopupUI.Instance.Show(StringConstants.NOT_ENOUGH_COINS_POPUP);
             return;
         }
 
-        OnItemBought?.Invoke(item, quantity);
-
-        playerCurrency -= totalCost;
-        currencyUI.SetCoins(playerCurrency);
-
-        model.RemoveItem(item, quantity);
+        model.CompletePurchase(item, quantity);
+        currencyUI.SetCoins(model.PlayerCoins);
         view.RefreshAllSlots();
+
+        OnItemBought?.Invoke(item, quantity);
     }
 
     public void TrySellItem(ItemSlot inventorySlot)
@@ -81,15 +80,17 @@ public class ShopController : MonoBehaviour
         if (inventorySlot == null || inventorySlot.item == null || inventorySlot.IsEmpty)
             return;
 
-        quantityPopup.Show(inventorySlot.item, 1, inventorySlot.count, SellItem, isBuying: false);
+        quantityPopup.Show(inventorySlot.item, 1, inventorySlot.count, inventorySlot.count, SellItem, isBuying: false);
     }
 
     private void SellItem(ItemData item, int quantity)
     {
-        OnItemSold?.Invoke(item, quantity);
+        if (!model.CanSell(item, quantity))
+            return;
 
-        int totalEarned = item.sellValue * quantity;
-        playerCurrency += totalEarned;
-        currencyUI.SetCoins(playerCurrency);
+        model.CompleteSale(item, quantity);
+        currencyUI.SetCoins(model.PlayerCoins);
+
+        OnItemSold?.Invoke(item, quantity);  // InventoryController will handle RemoveItem
     }
 }
