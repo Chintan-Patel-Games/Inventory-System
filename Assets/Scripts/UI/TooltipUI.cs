@@ -10,14 +10,13 @@ public class TooltipUI : MonoBehaviour
     [SerializeField] private GameObject panel;
     [SerializeField] private Image rarityBG;
     [SerializeField] private Image itemIcon;
+    [SerializeField] private TMP_Text countText;
     [SerializeField] private TMP_Text nameText;
     [SerializeField] private TMP_Text typeText;
     [SerializeField] private TMP_Text rarityText;
     [SerializeField] private TMP_Text descriptionText;
-    [SerializeField] private TMP_Text buyValueText;
-    [SerializeField] private TMP_Text sellValueText;
+    [SerializeField] private TMP_Text valueText;
     [SerializeField] private TMP_Text weightText;
-    [SerializeField] private TMP_Text maxStackText;
 
     private RectTransform tooltipRect;
     private RectTransform canvasRect;
@@ -48,25 +47,42 @@ public class TooltipUI : MonoBehaviour
         tooltipRect.anchoredPosition = localMousePos + new Vector2(size.x * 0.5f, -size.y * 0.5f);
     }
 
-    public void Show(ItemData item)
+    public void Show(ItemSlot itemSlot)
     {
-        if (item == null) return;
+        if (itemSlot.item == null) return;
 
-        itemIcon.sprite = item.icon;
-        rarityBG.sprite = item.rarityBg;
-        rarityBG.color = item.rarity == Rarity.VeryCommon ? new Color(1f, 1f, 1f, 0f) : Color.white;
+        itemIcon.sprite = itemSlot.item.icon;
+        rarityBG.sprite = itemSlot.item.rarityBg;
+        rarityBG.color = itemSlot.item.rarity == Rarity.VeryCommon ? new Color(1f, 1f, 1f, 0f) : Color.white;
 
-        nameText.text = StringConstants.ITEM_LABEL + item.itemName;
-        typeText.text = StringConstants.TYPE_LABEL + item.type;
-        rarityText.text = StringConstants.RARITY_LABEL + item.rarity;
-        descriptionText.text = StringConstants.DESCRIPTION_LABEL + item.description;
-        buyValueText.text = StringConstants.BUY_VALUE_LABEL + item.buyValue;
-        sellValueText.text = StringConstants.SELL_VALUE_LABEL + item.sellValue;
-        weightText.text = StringConstants.WEIGHT_LABEL + item.weight;
-        maxStackText.text = StringConstants.MAX_STACK_LABEL + item.maxStack;
+        countText.text = GetItemCountText(itemSlot);
+        nameText.text = StringConstants.ITEM_LABEL + itemSlot.item.itemName;
+        typeText.text = StringConstants.TYPE_LABEL + itemSlot.item.type;
+        rarityText.text = StringConstants.RARITY_LABEL + itemSlot.item.rarity;
+        descriptionText.text = StringConstants.DESCRIPTION_LABEL + itemSlot.item.description;
+        valueText.text = GetItemValueText(itemSlot);
+        weightText.text = StringConstants.WEIGHT_LABEL + itemSlot.item.weight;
 
         panel.SetActive(true);
     }
 
     public void Hide() => panel.SetActive(false);
+
+    private string GetItemCountText(ItemSlot itemSlot)
+    {
+        if (itemSlot.owner == SlotOwner.Inventory)
+            return StringConstants.FormatItemCount(itemSlot.count, itemSlot.item.maxStack);
+        else
+            return string.Empty;
+    }
+
+    private string GetItemValueText(ItemSlot itemSlot)
+    {
+        if (itemSlot.owner == SlotOwner.Shop)
+            return StringConstants.BUY_VALUE_LABEL + itemSlot.item.buyValue;
+        else if (itemSlot.owner == SlotOwner.Inventory)
+            return StringConstants.SELL_VALUE_LABEL + itemSlot.item.sellValue;
+        else
+            return string.Empty; // fallback
+    }
 }

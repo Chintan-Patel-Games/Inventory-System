@@ -8,6 +8,7 @@ public class ShopController : MonoBehaviour
     [SerializeField] private ShopView view;
     [SerializeField] private QuantityPopupUI quantityPopup;
     [SerializeField] private CurrencyUI currencyUI;
+    [SerializeField] private InventoryController inventoryController;
 
     [Header("Shop Item Generation")]
     [SerializeField] private ItemData[] availableItems;
@@ -21,6 +22,10 @@ public class ShopController : MonoBehaviour
     {
         InitializeModel();
         InitializeView();
+    }
+    public void Initialize(InventoryController inventory)
+    {
+        inventoryController = inventory;
     }
 
     private void InitializeModel() => model = new ShopModel(GenerateRandomShopItems(6));
@@ -57,7 +62,7 @@ public class ShopController : MonoBehaviour
         if (shopSlot == null || shopSlot.item == null || shopSlot.IsEmpty)
             return;
 
-        quantityPopup.Show(shopSlot.item, 1, 1, shopSlot.item.maxStack, BuyItem, isBuying: true);
+        quantityPopup.Show(shopSlot.item, 1, 1, model.GetTotalQuantityOf(shopSlot.item), BuyItem, isBuying: true);
     }
 
     private void BuyItem(ItemData item, int quantity)
@@ -80,7 +85,9 @@ public class ShopController : MonoBehaviour
         if (inventorySlot == null || inventorySlot.item == null || inventorySlot.IsEmpty)
             return;
 
-        quantityPopup.Show(inventorySlot.item, 1, inventorySlot.count, inventorySlot.count, SellItem, isBuying: false);
+        int totalQuantity = inventoryController.GetTotalQuantityOf(inventorySlot.item);
+
+        quantityPopup.Show(inventorySlot.item, 1, 1, totalQuantity, SellItem, isBuying: false);
     }
 
     private void SellItem(ItemData item, int quantity)

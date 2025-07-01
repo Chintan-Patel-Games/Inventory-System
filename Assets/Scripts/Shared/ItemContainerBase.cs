@@ -23,4 +23,15 @@ public abstract class ItemContainerBase
         foreach (var slot in slots)
             slot.Clear();
     }
+
+    public int GetTotalQuantityOf(ItemData item)
+    {
+        int total = 0;
+        foreach (var slot in slots)
+        {
+            if (slot.item == item)
+                total += slot.count;
+        }
+        return total;
+    }
 }

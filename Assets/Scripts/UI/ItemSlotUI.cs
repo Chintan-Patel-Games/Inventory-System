@@ -64,7 +64,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         {
             icon.sprite = slotData.item.icon;
             icon.gameObject.SetActive(true);
-            countText.text = slotData.count > 1 ? slotData.count.ToString() : string.Empty;
+            countText.text = slotData.count > 1 ? $"{slotData.count.ToString()}/{slotData.item.maxStack.ToString()}" : string.Empty;
 
             rarityBG.sprite = slotData.item.rarityBg;
             rarityBG.color = slotData.item.rarity == Rarity.VeryCommon ? new Color(1f, 1f, 1f, 0f) : Color.white;
@@ -83,8 +83,8 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     {
         yield return new WaitForSeconds(tooltipDelay);
 
-        if (slotData.item != null && TooltipUI.Instance != null)
-            TooltipUI.Instance.Show(slotData.item);
+        if (slotData != null && TooltipUI.Instance != null)
+            TooltipUI.Instance.Show(slotData);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -176,8 +176,31 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         {
             if (slotData.owner == SlotOwner.Inventory && targetSlot.slotData.owner == SlotOwner.Inventory)
             {
-                onSwapRequest?.Invoke(index, targetSlot.index);
-                return;
+                if (targetSlot.slotData == null)
+                {
+                    onSwapRequest?.Invoke(index, targetSlot.index);
+                    return;
+                }
+                else if (slotData.item == targetSlot.slotData.item && targetSlot.slotData.count < targetSlot.slotData.item.maxStack)
+                {
+                    int transferableAmount = Mathf.Min(
+                        slotData.count,
+                        targetSlot.slotData.item.maxStack - targetSlot.slotData.count
+                    );
+
+                    if (transferableAmount > 0)
+                    {
+                        targetSlot.slotData.count += transferableAmount;
+                        slotData.count -= transferableAmount;
+
+                        if (slotData.count <= 0)
+                            slotData.Clear();
+
+                        UpdateSlot();
+                        targetSlot.UpdateSlot();
+                        return;
+                    }
+                }
             }
 
             if (slotData.owner == SlotOwner.Shop && targetSlot.slotData.owner == SlotOwner.Inventory)

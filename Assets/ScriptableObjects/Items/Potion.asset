@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Potion
   type: 2
-  icon: {fileID: 21300000, guid: e52ea25af699fd445b7046374f81a5b9, type: 3}
   description: A common Health potion to replenis your health
+  icon: {fileID: 21300000, guid: e52ea25af699fd445b7046374f81a5b9, type: 3}
+  rarityBg: {fileID: 21300000, guid: c1c3b8a66279725439fde8f23b28c1ca, type: 3}
   buyValue: 25
   sellValue: 12
   weight: 1

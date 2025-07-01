@@ -16,6 +16,7 @@ MonoBehaviour:
   type: 1
   description: An exquistue sharp Axe
   icon: {fileID: 21300000, guid: 172774604c1bee84185a69041576525b, type: 3}
+  rarityBg: {fileID: 21300000, guid: 3e59d475424998e42b8452df65d52148, type: 3}
   buyValue: 120
   sellValue: 60
   weight: 4

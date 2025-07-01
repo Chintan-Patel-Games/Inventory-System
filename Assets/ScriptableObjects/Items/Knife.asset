@@ -16,6 +16,7 @@ MonoBehaviour:
   type: 1
   description: An exquistue sharp Knife
   icon: {fileID: 21300000, guid: 08d5ec2d201ece949a5e428ba3ea0e63, type: 3}
+  rarityBg: {fileID: 21300000, guid: c1c3b8a66279725439fde8f23b28c1ca, type: 3}
   buyValue: 40
   sellValue: 20
   weight: 3

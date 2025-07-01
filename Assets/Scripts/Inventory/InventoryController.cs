@@ -74,4 +74,6 @@ public class InventoryController : MonoBehaviour
     public int GetTotalLifetimeValue() => model.GetTotalLifetimeValue();
 
     public int GetMaxWeightLimit() => model.MaxWeightLimit;
+
+    public int GetTotalQuantityOf(ItemData item) => model.GetTotalQuantityOf(item);
 }

@@ -1,7 +1,8 @@
+using System;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
 
 public class QuantityPopupUI : MonoBehaviour
 {
@@ -14,10 +15,13 @@ public class QuantityPopupUI : MonoBehaviour
     [SerializeField] private TMP_Text quantityText;
     [SerializeField] private TMP_Text totalPriceText;
 
+    [SerializeField] private Slider quantitySlider;
     [SerializeField] private Button increaseButton;
     [SerializeField] private Button decreaseButton;
     [SerializeField] private Button confirmButton;
     [SerializeField] private Button closeButton;
+
+    [SerializeField] private ConfirmationPopupUI confirmationPopup;
 
     private int currentQuantity;
     private int maxQuantity;
@@ -30,6 +34,13 @@ public class QuantityPopupUI : MonoBehaviour
         currentItem = item;
         currentQuantity = Mathf.Clamp(startQty, totalQnt, maxQty);
         maxQuantity = maxQty;
+
+        // Setting up the slider
+        quantitySlider.minValue = 1;
+        quantitySlider.maxValue = maxQuantity;
+        quantitySlider.wholeNumbers = true;
+        quantitySlider.value = currentQuantity;
+
         onConfirm = confirmCallback;
         this.isBuying = isBuying;
 
@@ -39,6 +50,7 @@ public class QuantityPopupUI : MonoBehaviour
 
     private void Awake()
     {
+        quantitySlider.onValueChanged.AddListener(OnSliderValueChanged);
         increaseButton.onClick.AddListener(IncreaseQuantity);
         decreaseButton.onClick.AddListener(DecreaseQuantity);
         confirmButton.onClick.AddListener(Confirm);
@@ -54,10 +66,17 @@ public class QuantityPopupUI : MonoBehaviour
         rarityBG.color = currentItem.rarity == Rarity.VeryCommon ? new Color(1f, 1f, 1f, 0f) : Color.white;
         nameText.text = currentItem.itemName;
         descriptionText.text = currentItem.description;
+        quantitySlider.value = currentQuantity;
 
         quantityText.text = currentQuantity.ToString();
         int pricePerItem = isBuying ? currentItem.buyValue : currentItem.sellValue;
         totalPriceText.text = (pricePerItem * currentQuantity).ToString();
+    }
+
+    private void OnSliderValueChanged(float value)
+    {
+        currentQuantity = (int)value;
+        UpdateUI();
     }
 
     private void IncreaseQuantity()
@@ -80,8 +99,16 @@ public class QuantityPopupUI : MonoBehaviour
 
     private void Confirm()
     {
-        onConfirm?.Invoke(currentItem, currentQuantity);
-        Hide();
+        int totalPrice = (isBuying ? currentItem.buyValue : currentItem.sellValue) * currentQuantity;
+        string message = isBuying
+            ? StringConstants.FormatBuyConfirmation(currentQuantity, currentItem.itemName, totalPrice)
+            : StringConstants.FormatSellConfirmation(currentQuantity, currentItem.itemName, totalPrice);
+
+        confirmationPopup.Show(message, () =>
+        {
+            onConfirm?.Invoke(currentItem, currentQuantity);
+            Hide();
+        });
     }
 
     public void Hide()

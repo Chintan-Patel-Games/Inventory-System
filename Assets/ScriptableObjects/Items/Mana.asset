@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Mana
   type: 2
-  icon: {fileID: 21300000, guid: 6592b916f86b19e428db6f6847c7b6dd, type: 3}
   description: A common Mana bottle to replenis your mana
+  icon: {fileID: 21300000, guid: 6592b916f86b19e428db6f6847c7b6dd, type: 3}
+  rarityBg: {fileID: 21300000, guid: c1c3b8a66279725439fde8f23b28c1ca, type: 3}
   buyValue: 20
   sellValue: 10
   weight: 1
