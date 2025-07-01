@@ -141,6 +141,10 @@ MonoBehaviour:
   rarityBG: {fileID: 6807599098732697703}
   icon: {fileID: 6590473611561824545}
   countText: {fileID: 5180179804865791807}
+  commonBG: {fileID: 21300000, guid: c1c3b8a66279725439fde8f23b28c1ca, type: 3}
+  rareBG: {fileID: 21300000, guid: 7df128936abc5a947ae465ec490d85de, type: 3}
+  epicBG: {fileID: 21300000, guid: 3e59d475424998e42b8452df65d52148, type: 3}
+  legendaryBG: {fileID: 21300000, guid: bd90d58cb87916b46ba8c190ebb14cb6, type: 3}
 --- !u!225 &3150722030770246868
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -187,7 +191,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -10, y: 0}
+  m_AnchoredPosition: {x: -25, y: 0}
   m_SizeDelta: {x: 64, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &8521761124291185466
@@ -245,8 +249,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
-  m_fontSizeBase: 20
+  m_fontSize: 15
+  m_fontSizeBase: 15
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

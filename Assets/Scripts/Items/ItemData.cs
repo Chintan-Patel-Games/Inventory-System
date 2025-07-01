@@ -26,6 +26,7 @@ public class ItemData : ScriptableObject
 
     [Header("Visuals")]
     public Sprite icon;
+    public Sprite rarityBg;
 
     [Header("Stats")]
     public int buyValue;

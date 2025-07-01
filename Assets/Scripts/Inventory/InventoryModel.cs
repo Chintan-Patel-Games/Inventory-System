@@ -1,21 +1,15 @@
 using System;
-using System.Collections.Generic;
 
 public class InventoryModel : ItemContainerBase
 {
-    public int MaxSlotCount { get; private set; }
     public int MaxWeightLimit { get; private set; }
+
+    private int totalLifetimeValue = 0;
+
+    // Event to notify when inventory changes (items added/removed/swapped)
     public event Action OnInventoryChanged;
 
-    public InventoryModel(int slotCount, int maxWeightLimit)
-    {
-        MaxSlotCount = slotCount;
-        MaxWeightLimit = maxWeightLimit;
-        slots = new List<ItemSlot>(slotCount);
-
-        for (int i = 0; i < slotCount; i++)
-            slots.Add(new ItemSlot());
-    }
+    public InventoryModel(int maxWeightLimit) => MaxWeightLimit = maxWeightLimit;
 
     public bool AddItem(ItemData item, int count = 1)
     {
@@ -23,6 +17,7 @@ public class InventoryModel : ItemContainerBase
             return false;
 
         bool inventoryChanged = false;
+        int originalCount = count; // Track how many we tried to add
 
         // Try stacking into existing slots
         foreach (var slot in slots)
@@ -59,12 +54,16 @@ public class InventoryModel : ItemContainerBase
             }
         }
 
+        int addedAmount = originalCount - count; // this is the actual added quantity
+        if (addedAmount > 0)
+            totalLifetimeValue += item.sellValue * addedAmount;
+
         if (inventoryChanged)
             OnInventoryChanged?.Invoke();
 
-        // Return true if all items were added, false if some couldn't be added
         return count == 0;
     }
+
 
     public void RemoveItem(ItemData item, int quantity = 1)
     {
@@ -112,16 +111,5 @@ public class InventoryModel : ItemContainerBase
         return totalWeight;
     }
 
-    public int GetTotalValue()
-    {
-        int totalValue = 0;
-        foreach (var slot in slots)
-        {
-            if (!slot.IsEmpty)
-                totalValue += slot.item.sellValue * slot.count;
-        }
-        return totalValue;
-    }
-
-    public int GetMaxWeightLimit() => MaxWeightLimit;
+    public int GetTotalLifetimeValue() => totalLifetimeValue;
 }

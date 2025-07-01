@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class InventoryController : MonoBehaviour
@@ -6,7 +5,6 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private InventoryView view;
     [SerializeField] private GatherManager gatherManager;
     [SerializeField] private ShopController shopController;
-    [SerializeField] private int maxSlots = 30;
     [SerializeField] private int maxWeightLimit = 500;
 
     private InventoryModel model;
@@ -18,53 +16,41 @@ public class InventoryController : MonoBehaviour
 
         model.OnInventoryChanged += RefreshAllSlots;
 
+        gatherManager.Initialize(GetTotalLifetimeValue, GetTotalWeight, GetMaxWeightLimit);
+        gatherManager.OnItemGathered += HandleItemGathered;
+
         // Subscribe to shop events
         shopController.OnItemBought += HandleItemBought;
         shopController.OnItemSold += HandleItemSold;
     }
 
-    private void InitializeModel() => model = new InventoryModel(maxSlots, maxWeightLimit);
+    private void InitializeModel() => model = new InventoryModel(maxWeightLimit);
 
     private void InitializeView()
     {
         view.Initialize(SwapSlots, shopController.TrySellItem);
-        view.LinkGathering(TryGatherItem, GetTotalWeight, GetTotalValue, GetMaxWeightLimit);
+        view.LinkGathering(gatherManager.Gather, GetTotalWeight, GetTotalLifetimeValue, GetMaxWeightLimit);
         view.RefreshUI(model.GetAllSlots());
     }
 
     public void RefreshAllSlots() => view.RefreshAllSlots();
 
-    public void TryGatherItem()
+    private void HandleItemGathered(ItemData item, int quantity)
     {
-        ItemData item = gatherManager.GetRandomItemBasedOnValue(GetTotalValue(), out int quantity);
-        if (item == null) return;
-
-        int stackSize = item.maxStack >= 10 ? 10 : 1;
-        int totalWeightIfAdded = GetTotalWeight() + (item.weight * stackSize);
-
-        if (totalWeightIfAdded > GetMaxWeightLimit())
-        {
-            PopupUI.Instance.Show(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP);
-            return;
-        }
-
-        bool added = AddItem(item, stackSize);
+        bool added = AddItem(item, quantity);
         if (!added)
             PopupUI.Instance.Show(StringConstants.INVENTORY_FULL_POPUP);
     }
 
     private void HandleItemBought(ItemData item, int quantity)
     {
-        bool added = model.AddItem(item, quantity);
+        bool added = AddItem(item, quantity);
 
         if (!added)
             PopupUI.Instance.Show(StringConstants.INVENTORY_FULL_POPUP);
     }
 
-    private void HandleItemSold(ItemData item, int quantity)
-    {
-        model.RemoveItem(item, quantity);
-    }
+    private void HandleItemSold(ItemData item, int quantity) => RemoveItem(item, quantity);
 
     public bool AddItem(ItemData item, int count = 1)
     {
@@ -85,7 +71,9 @@ public class InventoryController : MonoBehaviour
 
     public int GetTotalWeight() => model.GetTotalWeight();
 
-    public int GetTotalValue() => model.GetTotalValue();
+    public int GetTotalLifetimeValue() => model.GetTotalLifetimeValue();
 
-    public int GetMaxWeightLimit() => model.GetMaxWeightLimit();
+    public int GetMaxWeightLimit() => model.MaxWeightLimit;
+
+    public int GetTotalQuantityOf(ItemData item) => model.GetTotalQuantityOf(item);
 }

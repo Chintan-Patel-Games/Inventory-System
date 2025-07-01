@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: Necklace
   type: 3
-  icon: {fileID: 21300000, guid: 0e123cfdc54a3ca4684816a34167a566, type: 3}
   description: An expensive Necklace
+  icon: {fileID: 21300000, guid: 0e123cfdc54a3ca4684816a34167a566, type: 3}
+  rarityBg: {fileID: 21300000, guid: 7df128936abc5a947ae465ec490d85de, type: 3}
   buyValue: 200
   sellValue: 100
   weight: 1

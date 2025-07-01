@@ -16,6 +16,7 @@ MonoBehaviour:
   type: 0
   description: A common Silver bar
   icon: {fileID: 21300000, guid: 3e4fcc84a0ac95b429c56452575f6021, type: 3}
+  rarityBg: {fileID: 21300000, guid: c1c3b8a66279725439fde8f23b28c1ca, type: 3}
   buyValue: 30
   sellValue: 15
   weight: 2

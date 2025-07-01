@@ -16,6 +16,7 @@ MonoBehaviour:
   type: 1
   description: An exquistue sharp Sword
   icon: {fileID: 21300000, guid: a332f9cc2040f6042a04c65fa9e4a000, type: 3}
+  rarityBg: {fileID: 21300000, guid: 7df128936abc5a947ae465ec490d85de, type: 3}
   buyValue: 100
   sellValue: 90
   weight: 4

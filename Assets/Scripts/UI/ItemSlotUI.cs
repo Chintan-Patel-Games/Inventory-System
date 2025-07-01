@@ -46,18 +46,16 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         UpdateSlot();
     }
 
-    public void ShopSetup(ItemSlot slot, Action<ItemSlot> onBuyRequest, Action<ItemSlot> onSellRequest)
+    public void ShopSetup(ItemSlot slot, int index, Action<ItemSlot> onBuyRequest, Action<ItemSlot> onSellRequest)
     {
         slotData = slot;
         slotData.owner = SlotOwner.Shop; // Set owner to Shop
-        index = -1; // Not used for shop slots
-        onSwapRequest = null;
+        this.index = index;
+        this.onBuyRequest = onBuyRequest;
+        this.onSellRequest = onSellRequest;
 
         canvasGroup = GetComponent<CanvasGroup>();
         UpdateSlot();
-
-        this.onBuyRequest = onBuyRequest;
-        this.onSellRequest = onSellRequest;
     }
 
     public void UpdateSlot()
@@ -66,11 +64,10 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         {
             icon.sprite = slotData.item.icon;
             icon.gameObject.SetActive(true);
-            countText.text = slotData.count > 1 ? slotData.count.ToString() : string.Empty;
+            countText.text = slotData.count > 1 ? $"{slotData.count.ToString()}/{slotData.item.maxStack.ToString()}" : string.Empty;
 
-            Sprite raritySprite = GetRaritySpriteForItem(slotData.item);
-            rarityBG.sprite = raritySprite;
-            rarityBG.color = raritySprite == null ? new Color(1f, 1f, 1f, 0f) : Color.white;
+            rarityBG.sprite = slotData.item.rarityBg;
+            rarityBG.color = slotData.item.rarity == Rarity.VeryCommon ? new Color(1f, 1f, 1f, 0f) : Color.white;
         }
         else
         {
@@ -82,29 +79,12 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     public ItemSlot GetSlot() => slotData;
 
-    private Sprite GetRaritySprite(Rarity rarity)
-    {
-        return rarity switch
-        {
-            Rarity.Common => commonBG,
-            Rarity.Rare => rareBG,
-            Rarity.Epic => epicBG,
-            Rarity.Legendary => legendaryBG,
-            _ => null
-        };
-    }
-
-    public Sprite GetRaritySpriteForItem(ItemData item) => (item == null || item.rarity == Rarity.VeryCommon) ? null : GetRaritySprite(item.rarity);
-
     private IEnumerator ShowTooltipWithDelay()
     {
         yield return new WaitForSeconds(tooltipDelay);
 
-        if (slotData.item != null && TooltipUI.Instance != null)
-        {
-            Sprite raritySprite = GetRaritySpriteForItem(slotData.item);
-            TooltipUI.Instance.Show(slotData.item, raritySprite);
-        }
+        if (slotData != null && TooltipUI.Instance != null)
+            TooltipUI.Instance.Show(slotData);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -196,8 +176,31 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         {
             if (slotData.owner == SlotOwner.Inventory && targetSlot.slotData.owner == SlotOwner.Inventory)
             {
-                onSwapRequest?.Invoke(index, targetSlot.index);
-                return;
+                if (targetSlot.slotData == null)
+                {
+                    onSwapRequest?.Invoke(index, targetSlot.index);
+                    return;
+                }
+                else if (slotData.item == targetSlot.slotData.item && targetSlot.slotData.count < targetSlot.slotData.item.maxStack)
+                {
+                    int transferableAmount = Mathf.Min(
+                        slotData.count,
+                        targetSlot.slotData.item.maxStack - targetSlot.slotData.count
+                    );
+
+                    if (transferableAmount > 0)
+                    {
+                        targetSlot.slotData.count += transferableAmount;
+                        slotData.count -= transferableAmount;
+
+                        if (slotData.count <= 0)
+                            slotData.Clear();
+
+                        UpdateSlot();
+                        targetSlot.UpdateSlot();
+                        return;
+                    }
+                }
             }
 
             if (slotData.owner == SlotOwner.Shop && targetSlot.slotData.owner == SlotOwner.Inventory)

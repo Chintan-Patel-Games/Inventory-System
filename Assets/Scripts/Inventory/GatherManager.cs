@@ -1,10 +1,57 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 
 public class GatherManager : MonoBehaviour
 {
     [SerializeField] private ItemData[] gatherableItems;
     [SerializeField] private RarityDropConfig rarityConfig;
+
+    // Event triggered when a valid item is gathered
+    public event Action<ItemData, int> OnItemGathered;
+
+    private Func<int> getTotalLifetimeValue;
+    private Func<int> getCurrentWeight;
+    private Func<int> getMaxWeight;
+
+    public void Initialize(Func<int> getValue, Func<int> getWeight, Func<int> getMaxWeight)
+    {
+        getTotalLifetimeValue = getValue;
+        getCurrentWeight = getWeight;
+        this.getMaxWeight = getMaxWeight;
+    }
+
+    public void Gather()
+    {
+        if (getTotalLifetimeValue == null || getCurrentWeight == null || getMaxWeight == null)
+            return;
+
+        int totalLifetimeValue = getTotalLifetimeValue();
+        int currentWeight = getCurrentWeight();
+        int maxWeight = getMaxWeight();
+
+        int itemsToGather = UnityEngine.Random.Range(3, 6); // 3 to 5 items
+
+        for (int i = 0; i < itemsToGather; i++)
+        {
+            ItemData item = GetRandomItemBasedOnValue(totalLifetimeValue, out _);
+            if (item == null) continue;
+
+            int quantity = item.maxStack == 1 ? 1 : UnityEngine.Random.Range(1, 6) * 10;
+
+            int weightToAdd = item.weight * quantity;
+
+            if (currentWeight + weightToAdd > maxWeight)
+            {
+                PopupUI.Instance.Show(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP);
+                return;
+            }
+
+            currentWeight += weightToAdd;
+            OnItemGathered?.Invoke(item, quantity);
+        }
+    }
+
 
     public ItemData GetRandomItemBasedOnValue(int totalValue, out int quantity)
     {
@@ -24,7 +71,7 @@ public class GatherManager : MonoBehaviour
             return null;
         }
 
-        ItemData selectedItem = candidates[Random.Range(0, candidates.Count)];
+        ItemData selectedItem = candidates[UnityEngine.Random.Range(0, candidates.Count)];
         quantity = selectedItem.maxStack > 1 ? 10 : 1;
         return selectedItem;
     }
@@ -34,12 +81,11 @@ public class GatherManager : MonoBehaviour
         foreach (var threshold in rarityConfig.valueThresholds)
         {
             if (value <= threshold.valueCap)
-                return Random.Range(threshold.chanceRange.x, threshold.chanceRange.y);
+                return UnityEngine.Random.Range(threshold.chanceRange.x, threshold.chanceRange.y);
         }
 
-        // If above all caps, use highest range
         var last = rarityConfig.valueThresholds[^1];
-        return Random.Range(last.chanceRange.x, last.chanceRange.y);
+        return UnityEngine.Random.Range(last.chanceRange.x, last.chanceRange.y);
     }
 
     private Rarity GetRarityFromChance(float chance)
@@ -50,7 +96,6 @@ public class GatherManager : MonoBehaviour
                 return rarityChance.rarity;
         }
 
-        // Fallback to highest rarity
         return rarityConfig.rarityChances[^1].rarity;
     }
 }
