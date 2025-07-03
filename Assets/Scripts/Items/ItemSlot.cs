@@ -1,4 +1,8 @@
-public enum SlotOwner { Inventory, Shop }
+public enum SlotOwner
+{
+    Inventory,
+    Shop
+}
 
 [System.Serializable]
 public class ItemSlot

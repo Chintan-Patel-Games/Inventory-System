@@ -8,7 +8,6 @@ using UnityEngine.UI;
 public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [Header("UI References")]
-    [SerializeField] private Image slotBackground; // Reference to Bg_Slot_img
     [SerializeField] private Image rarityBG;       // bg_img for rarity
     [SerializeField] private Image icon;           // Item image
     [SerializeField] private TMP_Text countText;   // Quantity text
@@ -176,7 +175,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         {
             if (slotData.owner == SlotOwner.Inventory && targetSlot.slotData.owner == SlotOwner.Inventory)
             {
-                if (targetSlot.slotData == null)
+                if (targetSlot.slotData.item == null)
                 {
                     onSwapRequest?.Invoke(index, targetSlot.index);
                     return;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ShopView : MonoBehaviour
 {
@@ -8,16 +9,29 @@ public class ShopView : MonoBehaviour
     [SerializeField] private GameObject slotPrefab;
     [SerializeField] private Transform slotContainer;
 
+    [Header("Item Category Buttons")]
+    [SerializeField] private Button materialItems;
+    [SerializeField] private Button weaponItems;
+    [SerializeField] private Button consumableItems;
+    [SerializeField] private Button treasureItems;
+
     private List<ItemSlotUI> slotUIs = new();
 
     // Delegates
+    private Action<ItemType> OnCategorySelected;
     private Action<ItemSlot> onBuyRequest;
     private Action<ItemSlot> onSellRequest;
 
-    public void Initialize(Action<ItemSlot> onBuyRequest, Action<ItemSlot> onSellRequest)
+    public void Initialize(Action<ItemType> onCategorySelected, Action<ItemSlot> onBuyRequest, Action<ItemSlot> onSellRequest)
     {
+        this.OnCategorySelected = onCategorySelected;
         this.onBuyRequest = onBuyRequest;
         this.onSellRequest = onSellRequest;
+
+        materialItems.onClick.AddListener(() => OnCategorySelected?.Invoke(ItemType.Materials));
+        weaponItems.onClick.AddListener(() => OnCategorySelected?.Invoke(ItemType.Weapons));
+        consumableItems.onClick.AddListener(() => OnCategorySelected?.Invoke(ItemType.Consumables));
+        treasureItems.onClick.AddListener(() => OnCategorySelected?.Invoke(ItemType.Treasure));
     }
 
     public void RefreshUI(IReadOnlyList<ItemSlot> shopSlots)

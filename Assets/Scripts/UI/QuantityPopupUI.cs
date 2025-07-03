@@ -1,6 +1,5 @@
 using System;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,31 +21,14 @@ public class QuantityPopupUI : MonoBehaviour
     [SerializeField] private Button closeButton;
 
     [SerializeField] private ConfirmationPopupUI confirmationPopup;
+    [SerializeField] private PopupUI popup;
 
-    private int currentQuantity;
-    private int maxQuantity;
-    private ItemData currentItem;
-    private Action<ItemData, int> onConfirm;
+    private ItemSlot currentItemSlot;
+    private int currentQty;
+    private int affordableQty;
     private bool isBuying;
 
-    public void Show(ItemData item, int startQty, int totalQnt, int maxQty, Action<ItemData, int> confirmCallback, bool isBuying = true)
-    {
-        currentItem = item;
-        currentQuantity = Mathf.Clamp(startQty, totalQnt, maxQty);
-        maxQuantity = maxQty;
-
-        // Setting up the slider
-        quantitySlider.minValue = 1;
-        quantitySlider.maxValue = maxQuantity;
-        quantitySlider.wholeNumbers = true;
-        quantitySlider.value = currentQuantity;
-
-        onConfirm = confirmCallback;
-        this.isBuying = isBuying;
-
-        UpdateUI();
-        panel.SetActive(true);
-    }
+    private Action<ItemData, int> onConfirm;
 
     private void Awake()
     {
@@ -59,54 +41,100 @@ public class QuantityPopupUI : MonoBehaviour
         panel.SetActive(false);
     }
 
+    public void ShowBuyPopup(ItemSlot itemSlot, int maxQty, int currentGoldCoins, int currentWeight, int maxWeight, Action<ItemData, int> confirmCallback)
+    {
+        currentItemSlot = itemSlot;
+
+        // Calculate max quantity based on coins
+        int affordableQty = Mathf.FloorToInt((float)currentGoldCoins / itemSlot.item.buyValue);
+
+        // Calculate max quantity based on weight
+        int weightLimitQty = Mathf.FloorToInt((maxWeight - currentWeight) / itemSlot.item.weight);
+
+        int sliderMax = Mathf.Min(maxQty, affordableQty, weightLimitQty);
+
+        if (sliderMax <= 0)
+        {
+            popup.Show(StringConstants.NOT_ENOUGH_SPACE_OR_COINS);
+            return;
+        }
+
+        SetupSlider(sliderMax, confirmCallback, true);
+    }
+
+    public void ShowSellPopup(ItemSlot itemSlot, int maxQty, Action<ItemData, int> confirmCallback)
+    {
+        currentItemSlot = itemSlot;
+        int sliderMax = maxQty;
+        SetupSlider(sliderMax, confirmCallback, false);
+    }
+
+    private void SetupSlider(int sliderMax, Action<ItemData, int> confirmCallback, bool isBuying)
+    {
+        currentQty = 1;
+        this.isBuying = isBuying;
+        onConfirm = confirmCallback;
+
+        quantitySlider.minValue = 1;
+        quantitySlider.maxValue = sliderMax;
+        quantitySlider.wholeNumbers = true;
+        quantitySlider.value = currentQty;
+
+        UpdateUI();
+        panel.SetActive(true);
+    }
+
     private void UpdateUI()
     {
-        itemIcon.sprite = currentItem.icon;
-        rarityBG.sprite = currentItem.rarityBg;
-        rarityBG.color = currentItem.rarity == Rarity.VeryCommon ? new Color(1f, 1f, 1f, 0f) : Color.white;
-        nameText.text = currentItem.itemName;
-        descriptionText.text = currentItem.description;
-        quantitySlider.value = currentQuantity;
+        itemIcon.sprite = currentItemSlot.item.icon;
+        rarityBG.sprite = currentItemSlot.item.rarityBg;
+        rarityBG.color = currentItemSlot.item.rarity == Rarity.VeryCommon ? new Color(1f, 1f, 1f, 0f) : Color.white;
 
-        quantityText.text = currentQuantity.ToString();
-        int pricePerItem = isBuying ? currentItem.buyValue : currentItem.sellValue;
-        totalPriceText.text = (pricePerItem * currentQuantity).ToString();
+        nameText.text = currentItemSlot.item.itemName;
+        descriptionText.text = currentItemSlot.item.description;
+
+        quantityText.text = currentQty.ToString();
+
+        int pricePerItem = isBuying ? currentItemSlot.item.buyValue : currentItemSlot.item.sellValue;
+        totalPriceText.text = (pricePerItem * currentQty).ToString();
     }
 
     private void OnSliderValueChanged(float value)
     {
-        currentQuantity = (int)value;
+        currentQty = (int)value;
         UpdateUI();
     }
 
     private void IncreaseQuantity()
     {
-        if (currentQuantity < maxQuantity)
+        if (currentQty < affordableQty)
         {
-            currentQuantity++;
+            currentQty++;
+            quantitySlider.SetValueWithoutNotify(currentQty);
             UpdateUI();
         }
     }
 
     private void DecreaseQuantity()
     {
-        if (currentQuantity > 1)
+        if (currentQty > quantitySlider.minValue)
         {
-            currentQuantity--;
+            currentQty--;
+            quantitySlider.SetValueWithoutNotify(currentQty);
             UpdateUI();
         }
     }
 
     private void Confirm()
     {
-        int totalPrice = (isBuying ? currentItem.buyValue : currentItem.sellValue) * currentQuantity;
+        int totalPrice = (isBuying ? currentItemSlot.item.buyValue : currentItemSlot.item.sellValue) * currentQty;
         string message = isBuying
-            ? StringConstants.FormatBuyConfirmation(currentQuantity, currentItem.itemName, totalPrice)
-            : StringConstants.FormatSellConfirmation(currentQuantity, currentItem.itemName, totalPrice);
+            ? StringConstants.FormatBuyConfirmation(currentQty, currentItemSlot.item.itemName, totalPrice)
+            : StringConstants.FormatSellConfirmation(currentQty, currentItemSlot.item.itemName, totalPrice);
 
         confirmationPopup.Show(message, () =>
         {
-            onConfirm?.Invoke(currentItem, currentQuantity);
+            onConfirm?.Invoke(currentItemSlot.item, currentQty);
             Hide();
         });
     }
@@ -115,6 +143,6 @@ public class QuantityPopupUI : MonoBehaviour
     {
         panel.SetActive(false);
         onConfirm = null;
-        currentItem = null;
+        currentItemSlot = null;
     }
 }

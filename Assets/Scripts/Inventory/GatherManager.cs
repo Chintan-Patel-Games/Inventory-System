@@ -7,6 +7,8 @@ public class GatherManager : MonoBehaviour
     [SerializeField] private ItemData[] gatherableItems;
     [SerializeField] private RarityDropConfig rarityConfig;
 
+    private PopupUI popup;
+
     // Event triggered when a valid item is gathered
     public event Action<ItemData, int> OnItemGathered;
 
@@ -14,11 +16,12 @@ public class GatherManager : MonoBehaviour
     private Func<int> getCurrentWeight;
     private Func<int> getMaxWeight;
 
-    public void Initialize(Func<int> getValue, Func<int> getWeight, Func<int> getMaxWeight)
+    public void Initialize(Func<int> getValue, Func<int> getWeight, Func<int> getMaxWeight, PopupUI popup)
     {
         getTotalLifetimeValue = getValue;
         getCurrentWeight = getWeight;
         this.getMaxWeight = getMaxWeight;
+        this.popup = popup;
     }
 
     public void Gather()
@@ -43,7 +46,7 @@ public class GatherManager : MonoBehaviour
 
             if (currentWeight + weightToAdd > maxWeight)
             {
-                PopupUI.Instance.Show(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP);
+                popup.Show(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP);
                 return;
             }
 

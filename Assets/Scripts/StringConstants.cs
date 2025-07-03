@@ -15,11 +15,16 @@ public static class StringConstants
     public const string CURRENT_VALUE_LABEL = "Value : ";
 
     // Popup Messages
+    public const string NOT_ENOUGH_SPACE_OR_COINS = "Not enough space in Inventory or not enough Golld coins!";
     public const string MAX_WEIGHT_LIMIT_REACHED_POPUP = "You cannot carry more weight!";
     public const string INVENTORY_FULL_POPUP = "Inventory is full!";
     public const string NOT_ENOUGH_COINS_POPUP = "Not enough coins!";
     public static string BUY_CONFIRMATION_POPUP = "Do you want to buy\n{0} x {1}\nfor {2}";
     public static string SELL_CONFIRMATION_POPUP = "Do you want to sell\n{0} x {1}\nfor {2}";
+
+    // Toaster Messages
+    public static string BUY_TOASTER = "You Bought {0} x {1}";
+    public static string SELL_TOASTER = "You Sold {0} x {1}";
 
     public static string FormatItemCount(int itemCount, int maxStack) =>
         string.Format(COUNT_LABEL, itemCount, maxStack);
@@ -29,4 +34,10 @@ public static class StringConstants
 
     public static string FormatSellConfirmation(int quantity, string itemName, int totalPrice) =>
         string.Format(SELL_CONFIRMATION_POPUP, quantity, itemName, totalPrice);
+
+    public static string FormatBuyToaster(int quantity, string itemName) =>
+        string.Format(BUY_TOASTER, quantity, itemName);
+
+    public static string FormatSellToaster(int quantity, string itemName) =>
+        string.Format(SELL_TOASTER, quantity, itemName);
 }

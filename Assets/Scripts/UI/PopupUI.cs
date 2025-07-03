@@ -4,21 +4,12 @@ using UnityEngine.UI;
 
 public class PopupUI : MonoBehaviour
 {
-    public static PopupUI Instance { get; private set; }
-
     [SerializeField] private GameObject panel;
     [SerializeField] private TMP_Text messageText;
     [SerializeField] private Button closeButton;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-
         panel.SetActive(false);
 
         if (closeButton != null)
