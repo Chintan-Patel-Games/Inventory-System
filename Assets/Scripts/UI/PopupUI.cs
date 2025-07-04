@@ -7,6 +7,8 @@ public class PopupUI : MonoBehaviour
     [SerializeField] private GameObject panel;
     [SerializeField] private TMP_Text messageText;
 
+    public Action OnHide;
+
     private void Awake() => panel.SetActive(false);
 
     public void Show(string message)
@@ -17,5 +19,9 @@ public class PopupUI : MonoBehaviour
         panel.SetActive(true);
     }
 
-    public void Hide() => panel.SetActive(false);
+    public void Hide()
+    {
+        panel.SetActive(false);
+        OnHide?.Invoke(); // Notify UIManager
+    }
 }
