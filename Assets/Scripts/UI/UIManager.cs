@@ -47,20 +47,29 @@ public class UIManager : MonoBehaviour
     public void ShowPopup(string message, float autoCloseDelay = -1f)
     {
         SoundManager.Instance.PlayErrorSound();
-        quantityPopupUI.OnPopup -= ShowPopup; // Prevent recursion
+
+        // Properly hook into popup hide logic
+        popupUI.OnHide -= HidePopup;
+        popupUI.OnHide += HidePopup;
+
         popupUI.Show(message);
-        quantityPopupUI.OnPopup += ShowPopup; // Resubscribe after hiding
+        BlockRaycasts();
 
         if (autoCloseDelay > 0)
             StartCoroutine(AutoClosePopup(autoCloseDelay));
-
-        BlockRaycasts();
     }
 
     private IEnumerator AutoClosePopup(float delay)
     {
         yield return new WaitForSeconds(delay);
         popupUI.Hide();
+        UnblockRaycasts();
+    }
+
+    public void HidePopup()
+    {
+        popupUI.OnHide -= HidePopup; // Prevent duplicate unblocking
+        SoundManager.Instance.PlayPopupCloseClick();
         UnblockRaycasts();
     }
 
