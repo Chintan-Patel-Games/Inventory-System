@@ -23,15 +23,26 @@ public class QuantityPopupUI : MonoBehaviour
     [SerializeField] private ConfirmationPopupUI confirmationPopup;
     [SerializeField] private PopupUI popup;
 
+    private CanvasGroup canvasGroup;
+
     private ItemSlot currentItemSlot;
     private int currentQty;
     private int affordableQty;
-    private bool isBuying;
+    private int maxAvailableQty;
+    private bool isBuying = true;
 
-    private Action<ItemData, int> onConfirm;
+    // Notifies the UIManager to show a confirmation popup
+    public event Action<string, Action, Action> OnConfirmPopup;
+
+    // Holds the actual transaction logic (buy/sell logic)
+    private Action<ItemData, int> onTransactionConfirmed;
+
+    public Action OnHide;
 
     private void Awake()
     {
+        canvasGroup = GetComponent<CanvasGroup>();
+
         quantitySlider.onValueChanged.AddListener(OnSliderValueChanged);
         increaseButton.onClick.AddListener(IncreaseQuantity);
         decreaseButton.onClick.AddListener(DecreaseQuantity);
@@ -46,7 +57,8 @@ public class QuantityPopupUI : MonoBehaviour
         currentItemSlot = itemSlot;
 
         // Calculate max quantity based on coins
-        int affordableQty = Mathf.FloorToInt((float)currentGoldCoins / itemSlot.item.buyValue);
+        affordableQty = Mathf.FloorToInt((float)currentGoldCoins / itemSlot.item.buyValue);
+        maxAvailableQty = maxQty; // max stack or limit
 
         // Calculate max quantity based on weight
         int weightLimitQty = Mathf.FloorToInt((maxWeight - currentWeight) / itemSlot.item.weight);
@@ -55,6 +67,7 @@ public class QuantityPopupUI : MonoBehaviour
 
         if (sliderMax <= 0)
         {
+            SoundManager.Instance.PlayErrorSound();
             popup.Show(StringConstants.NOT_ENOUGH_SPACE_OR_COINS);
             return;
         }
@@ -66,6 +79,7 @@ public class QuantityPopupUI : MonoBehaviour
     {
         currentItemSlot = itemSlot;
         int sliderMax = maxQty;
+        maxAvailableQty = maxQty; // total quantity of that item
         SetupSlider(sliderMax, confirmCallback, false);
     }
 
@@ -73,7 +87,7 @@ public class QuantityPopupUI : MonoBehaviour
     {
         currentQty = 1;
         this.isBuying = isBuying;
-        onConfirm = confirmCallback;
+        onTransactionConfirmed = confirmCallback;
 
         quantitySlider.minValue = 1;
         quantitySlider.maxValue = sliderMax;
@@ -107,7 +121,13 @@ public class QuantityPopupUI : MonoBehaviour
 
     private void IncreaseQuantity()
     {
-        if (currentQty < affordableQty)
+        SoundManager.Instance.PlayUIClick(); // Play click sound on increase
+        // Enforce a hard limit of 100
+        affordableQty = Mathf.Min(affordableQty, 100);
+
+        int maxQty = isBuying ? affordableQty : maxAvailableQty;
+
+        if (currentQty < maxQty)
         {
             currentQty++;
             quantitySlider.SetValueWithoutNotify(currentQty);
@@ -117,6 +137,7 @@ public class QuantityPopupUI : MonoBehaviour
 
     private void DecreaseQuantity()
     {
+        SoundManager.Instance.PlayUIClick(); // Play click sound on decrease
         if (currentQty > quantitySlider.minValue)
         {
             currentQty--;
@@ -127,22 +148,33 @@ public class QuantityPopupUI : MonoBehaviour
 
     private void Confirm()
     {
+        canvasGroup.interactable = false;
+        canvasGroup.blocksRaycasts = false;
+
         int totalPrice = (isBuying ? currentItemSlot.item.buyValue : currentItemSlot.item.sellValue) * currentQty;
         string message = isBuying
             ? StringConstants.FormatBuyConfirmation(currentQty, currentItemSlot.item.itemName, totalPrice)
             : StringConstants.FormatSellConfirmation(currentQty, currentItemSlot.item.itemName, totalPrice);
 
-        confirmationPopup.Show(message, () =>
+        OnConfirmPopup?.Invoke(message, () =>
         {
-            onConfirm?.Invoke(currentItemSlot.item, currentQty);
+            onTransactionConfirmed?.Invoke(currentItemSlot.item, currentQty);
             Hide();
-        });
+        },  null);
     }
 
     public void Hide()
     {
+        SoundManager.Instance.PlayPopupCloseClick(); // Play Popup close sound
         panel.SetActive(false);
-        onConfirm = null;
+        onTransactionConfirmed = null;
         currentItemSlot = null;
+        OnHide?.Invoke(); // <- Notify UIManager
+    }
+
+    public void Reactivate()
+    {
+        canvasGroup.interactable = true;
+        canvasGroup.blocksRaycasts = true;
     }
 }

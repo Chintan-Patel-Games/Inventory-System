@@ -13,6 +13,7 @@ public class ConfirmationPopupUI : MonoBehaviour
 
     private Action onYes;
     private Action onNo;
+    public Action OnHide;
 
     private void Awake()
     {
@@ -35,17 +36,22 @@ public class ConfirmationPopupUI : MonoBehaviour
         panel.SetActive(false);
         onYes = null;
         onNo = null;
+        OnHide?.Invoke(); // <- Notify UIManager
     }
 
     private void HandleYes()
     {
+        SoundManager.Instance.PlayUIClick(); // Play click sound on confirmation
         onYes?.Invoke();
+        OnHide?.Invoke(); // <- Notify UIManager
         Hide();
     }
 
     private void HandleNo()
     {
+        SoundManager.Instance.PlayUIClick(); // Play click sound on cancellation
         onNo?.Invoke();
+        OnHide?.Invoke(); // <- Notify UIManager
         Hide();
     }
 }

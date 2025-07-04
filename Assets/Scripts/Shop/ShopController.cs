@@ -5,12 +5,9 @@ using UnityEngine;
 public class ShopController : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private PopupUI popup;
     [SerializeField] private ShopView view;
-    [SerializeField] private QuantityPopupUI quantityPopup;
-    [SerializeField] private CurrencyUI currencyUI;
-    [SerializeField] private ToasterUI toasterUI;
     [SerializeField] private InventoryController inventoryController;
+    [SerializeField] private UIManager uiManager;
 
     [Header("Shop Item Generation")]
     [SerializeField] private ItemData[] availableItems;
@@ -19,7 +16,7 @@ public class ShopController : MonoBehaviour
     private Dictionary<ItemType, List<ItemSlot>> categorizedSlots;
 
     public event Action<ItemData, int> OnItemBought;
-    public event Action<ItemData, int> OnItemSold;
+    public event Action<ItemData, int, int> OnItemSold;
 
     private void Awake()
     {
@@ -30,11 +27,11 @@ public class ShopController : MonoBehaviour
             ? materialSlots
             : new List<ItemSlot>());
 
-        HandleCategorySelected(ItemType.Materials); // Safe to call now
+        HandleCategorySelected(ItemType.Materials, false); // Safe to call now
         InitializeView();
     }
 
-    private void Start() => currencyUI.SetCoinsText(model.GoldCoins);
+    private void Start() => uiManager.ShowCurrency(model.GoldCoins);
 
     public void Initialize(InventoryController inventory) => inventoryController = inventory;
 
@@ -67,8 +64,11 @@ public class ShopController : MonoBehaviour
         }
     }
 
-    public void HandleCategorySelected(ItemType selectedType)
+    public void HandleCategorySelected(ItemType selectedType, bool playSound = true)
     {
+        if (playSound)
+            SoundManager.Instance.PlayUIClick();
+
         if (categorizedSlots.TryGetValue(selectedType, out List<ItemSlot> filtered))
             view.RefreshUI(filtered);
         else
@@ -78,48 +78,41 @@ public class ShopController : MonoBehaviour
     public void TryBuyItem(ItemSlot shopSlot)
     {
         if (shopSlot == null || shopSlot.item == null || shopSlot.IsEmpty) return;
-
         int maxQty = shopSlot.item.maxStack <= 1 ? 100 : shopSlot.item.maxStack;
-
-        quantityPopup.ShowBuyPopup(shopSlot, maxQty, model.GoldCoins, inventoryController.GetTotalWeight(), inventoryController.GetMaxWeightLimit(), BuyItem);
+        uiManager.ShowBuyQuantityPopup(shopSlot, maxQty, model.GoldCoins, inventoryController.GetTotalWeight(), inventoryController.GetMaxWeightLimit(), BuyItem);
     }
 
     private void BuyItem(ItemData item, int quantity)
     {
-        if (!model.CanBuy(item, quantity))
-        {
-            popup.Show(StringConstants.NOT_ENOUGH_COINS_POPUP);
-            return;
-        }
+        if (!model.CanBuy(item, quantity)) return;
 
         model.CompletePurchase(item, quantity);
-        currencyUI.SetCoinsText(model.GoldCoins);
-        toasterUI.ShowMessage(StringConstants.FormatBuyToaster(quantity, item.itemName));
+        SoundManager.Instance.PlayBuySound();
+        uiManager.ShowCurrency(model.GoldCoins);
+        uiManager.ShowToaster(StringConstants.FormatBuyToaster(quantity, item.itemName));
         view.RefreshAllSlots();
 
         OnItemBought?.Invoke(item, quantity);
     }
 
-    public void TrySellItem(ItemSlot inventorySlot)
+    public void TrySellItem(ItemSlot inventorySlot, int slotIndex)
     {
-        if (inventorySlot == null || inventorySlot.item == null || inventorySlot.IsEmpty)
-            return;
-
+        if (inventorySlot == null || inventorySlot.item == null || inventorySlot.IsEmpty) return;
         int totalQuantity = inventoryController.GetTotalQuantityOf(inventorySlot.item);
-
-        quantityPopup.ShowSellPopup(inventorySlot, totalQuantity, SellItem);
+        uiManager.ShowSellQuantityPopup(inventorySlot, totalQuantity, (item, qty) => SellItem(item, qty, slotIndex));
     }
 
-    private void SellItem(ItemData item, int quantity)
+    private void SellItem(ItemData item, int quantity, int slotIndex)
     {
         if (!model.CanSell(item, quantity))
             return;
 
         model.CompleteSale(item, quantity);
-        currencyUI.SetCoinsText(model.GoldCoins);
-        toasterUI.ShowMessage(StringConstants.FormatSellToaster(quantity, item.itemName));
+        SoundManager.Instance.PlaySellSound();
+        uiManager.ShowCurrency(model.GoldCoins);
+        uiManager.ShowToaster(StringConstants.FormatSellToaster(quantity, item.itemName));
         view.RefreshAllSlots();
 
-        OnItemSold?.Invoke(item, quantity);  // InventoryController will handle RemoveItem
+        OnItemSold?.Invoke(item, slotIndex, quantity);
     }
 }

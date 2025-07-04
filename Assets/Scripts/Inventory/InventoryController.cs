@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class InventoryController : MonoBehaviour
 {
-    [SerializeField] private PopupUI popup;
     [SerializeField] private InventoryView view;
     [SerializeField] private GatherManager gatherManager;
     [SerializeField] private ShopController shopController;
+    [SerializeField] private UIManager uiManager;
     [SerializeField] private int maxWeightLimit = 500;
 
     private InventoryModel model;
@@ -17,7 +17,7 @@ public class InventoryController : MonoBehaviour
 
         model.OnInventoryChanged += RefreshAllSlots;
 
-        gatherManager.Initialize(GetTotalLifetimeValue, GetTotalWeight, GetMaxWeightLimit, popup);
+        gatherManager.Initialize(GetTotalLifetimeValue, GetTotalWeight, GetMaxWeightLimit);
         gatherManager.OnItemGathered += HandleItemGathered;
 
         // Subscribe to shop events
@@ -29,7 +29,7 @@ public class InventoryController : MonoBehaviour
 
     private void InitializeView()
     {
-        view.Initialize(SwapSlots, shopController.TrySellItem, popup);
+        view.Initialize(SwapSlots, shopController.TrySellItem, uiManager);
         view.LinkGathering(gatherManager.Gather, GetTotalWeight, GetTotalLifetimeValue, GetMaxWeightLimit);
         view.RefreshUI(model.GetAllSlots());
     }
@@ -39,19 +39,16 @@ public class InventoryController : MonoBehaviour
     private void HandleItemGathered(ItemData item, int quantity)
     {
         bool added = AddItem(item, quantity);
-        if (!added)
-            popup.Show(StringConstants.INVENTORY_FULL_POPUP);
+        if (!added) uiManager.ShowPopup(StringConstants.INVENTORY_FULL_POPUP);
     }
 
     private void HandleItemBought(ItemData item, int quantity)
     {
         bool added = AddItem(item, quantity);
-
-        if (!added)
-            popup.Show(StringConstants.INVENTORY_FULL_POPUP);
+        if (!added) uiManager.ShowPopup(StringConstants.INVENTORY_FULL_POPUP);
     }
 
-    private void HandleItemSold(ItemData item, int quantity) => RemoveItem(item, quantity);
+    public void HandleItemSold(ItemData item, int slotIndex, int quantity) => RemoveItem(item, slotIndex, quantity);
 
     public bool AddItem(ItemData item, int count = 1)
     {
@@ -59,12 +56,12 @@ public class InventoryController : MonoBehaviour
 
         bool success = model.AddItem(item, count);
 
-        if (!success) popup.Show(StringConstants.INVENTORY_FULL_POPUP);
+        if (!success) uiManager.ShowPopup(StringConstants.INVENTORY_FULL_POPUP);
 
         return success;
     }
 
-    public void RemoveItem(ItemData item, int count = 1) => model.RemoveItem(item, count);
+    public void RemoveItem(ItemData item, int specificSlotIndex, int count = 1) => model.RemoveItem(item, specificSlotIndex, count);
 
     public void SwapSlots(int indexA, int indexB) => model.SwapSlots(indexA, indexB);
 

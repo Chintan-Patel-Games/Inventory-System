@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,12 +9,14 @@ public class PopupUI : MonoBehaviour
     [SerializeField] private TMP_Text messageText;
     [SerializeField] private Button closeButton;
 
+    public Action OnHide;
+
     private void Awake()
     {
         panel.SetActive(false);
 
         if (closeButton != null)
-            closeButton.onClick.AddListener(ClosePopup);
+            closeButton.onClick.AddListener(Hide);
     }
 
     public void Show(string message)
@@ -24,5 +27,9 @@ public class PopupUI : MonoBehaviour
         panel.SetActive(true);
     }
 
-    public void ClosePopup() => panel.SetActive(false);
+    public void Hide()
+    {
+        panel.SetActive(false);
+        OnHide?.Invoke(); // <- Notify UIManager
+    }
 }

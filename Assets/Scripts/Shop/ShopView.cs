@@ -18,20 +18,20 @@ public class ShopView : MonoBehaviour
     private List<ItemSlotUI> slotUIs = new();
 
     // Delegates
-    private Action<ItemType> OnCategorySelected;
+    private Action<ItemType, bool> OnCategorySelected;
     private Action<ItemSlot> onBuyRequest;
-    private Action<ItemSlot> onSellRequest;
+    private Action<ItemSlot, int> onSellRequest;
 
-    public void Initialize(Action<ItemType> onCategorySelected, Action<ItemSlot> onBuyRequest, Action<ItemSlot> onSellRequest)
+    public void Initialize(Action<ItemType, bool> onCategorySelected, Action<ItemSlot> onBuyRequest, Action<ItemSlot, int> onSellRequest)
     {
         this.OnCategorySelected = onCategorySelected;
         this.onBuyRequest = onBuyRequest;
         this.onSellRequest = onSellRequest;
 
-        materialItems.onClick.AddListener(() => OnCategorySelected?.Invoke(ItemType.Materials));
-        weaponItems.onClick.AddListener(() => OnCategorySelected?.Invoke(ItemType.Weapons));
-        consumableItems.onClick.AddListener(() => OnCategorySelected?.Invoke(ItemType.Consumables));
-        treasureItems.onClick.AddListener(() => OnCategorySelected?.Invoke(ItemType.Treasure));
+        materialItems.onClick.AddListener(() => OnCategorySelected?.Invoke(ItemType.Materials, true));
+        weaponItems.onClick.AddListener(() => OnCategorySelected?.Invoke(ItemType.Weapons, true));
+        consumableItems.onClick.AddListener(() => OnCategorySelected?.Invoke(ItemType.Consumables, true));
+        treasureItems.onClick.AddListener(() => OnCategorySelected?.Invoke(ItemType.Treasure, true));
     }
 
     public void RefreshUI(IReadOnlyList<ItemSlot> shopSlots)

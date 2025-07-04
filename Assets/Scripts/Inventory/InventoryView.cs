@@ -18,21 +18,21 @@ public class InventoryView : MonoBehaviour
     [SerializeField] private TMP_Text totalValueText;
 
     private List<ItemSlotUI> slotUIs = new();
-    private PopupUI popup;
+    private UIManager uiManager;
 
     // Delegates
     private Action<int, int> onSwapRequest;
-    private Action<ItemSlot> onSellRequest;
+    private Action<ItemSlot, int> onSellRequest;
     private Action onGatherClicked;
     private Func<int> getTotalWeight;
     private Func<int> getTotalValue;
     private Func<int> getMaxWeightLimit;
 
-    public void Initialize(Action<int, int> onSwapRequest, Action<ItemSlot> onSellRequest, PopupUI popup)
+    public void Initialize(Action<int, int> onSwapRequest, Action<ItemSlot, int> onSellRequest, UIManager uiManager)
     {
         this.onSwapRequest = onSwapRequest;
         this.onSellRequest = onSellRequest;
-        this.popup = popup;
+        this.uiManager = uiManager;
     }
 
     public void LinkGathering(Action onGatherClicked, Func<int> getTotalWeight, Func<int> getTotalValue, Func<int> getMaxWeightLimit)
@@ -82,7 +82,7 @@ public class InventoryView : MonoBehaviour
 
         if (totalWeight >= getMaxWeightLimit())
         {
-            popup.Show(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP);
+            uiManager.ShowPopup(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP);
             return;
         }
 

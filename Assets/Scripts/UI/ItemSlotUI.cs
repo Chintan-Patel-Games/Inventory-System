@@ -31,9 +31,9 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     // Shop Delegates
     private Action<ItemSlot> onBuyRequest;
-    private Action<ItemSlot> onSellRequest;
+    private Action<ItemSlot, int> onSellRequest;
 
-    public void InventorySetup(ItemSlot slot, int index, Action<int, int> onSwapRequest, Action<ItemSlot> onSellRequest)
+    public void InventorySetup(ItemSlot slot, int index, Action<int, int> onSwapRequest, Action<ItemSlot, int> onSellRequest)
     {
         slotData = slot;
         slotData.owner = SlotOwner.Inventory; // Set owner to Inventory
@@ -45,7 +45,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
         UpdateSlot();
     }
 
-    public void ShopSetup(ItemSlot slot, int index, Action<ItemSlot> onBuyRequest, Action<ItemSlot> onSellRequest)
+    public void ShopSetup(ItemSlot slot, int index, Action<ItemSlot> onBuyRequest, Action<ItemSlot, int> onSellRequest)
     {
         slotData = slot;
         slotData.owner = SlotOwner.Shop; // Set owner to Shop
@@ -210,7 +210,7 @@ public class ItemSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
             if (slotData.owner == SlotOwner.Inventory && targetSlot.slotData.owner == SlotOwner.Shop)
             {
-                onSellRequest?.Invoke(slotData);
+                onSellRequest?.Invoke(slotData, index);
                 return;
             }
         }

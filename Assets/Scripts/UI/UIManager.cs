@@ -1,49 +1,122 @@
-using System.Collections.Generic;
+using System;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
-    public static UIManager Instance { get; private set; }
+    [Header("Raycast Blocker")]
+    [SerializeField] private GameObject raycastBlocker;
 
-    [SerializeField] private List<CanvasGroup> interactivePanels = new();
+    [Header("Popup References")]
+    [SerializeField] private QuantityPopupUI quantityPopupUI;
+    [SerializeField] private ConfirmationPopupUI confirmationPopupUI;
+    [SerializeField] private PopupUI popupUI;
+    [SerializeField] private ToasterUI toasterUI;
+
+    [Header("UI Elements")]
+    [SerializeField] private TMP_Text coinsText;
+    [SerializeField] private Button closeGame;
+
+    private int blockCount = 0;
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        quantityPopupUI.OnHide += HideQuantityPopup;
+        quantityPopupUI.OnConfirmPopup += ShowConfirmationPopup;
+        confirmationPopupUI.OnHide += HideConfirmationPopup;
+        popupUI.OnHide += HidePopup;
 
-        Instance = this;
+        closeGame.onClick.AddListener(CloseGame);
     }
 
-    public void BlockAllExcept(CanvasGroup allowedPanel)
+    private void BlockRaycasts()
     {
-        foreach (var panel in interactivePanels)
-        {
-            bool allow = panel == allowedPanel;
-            panel.interactable = allow;
-            panel.blocksRaycasts = allow;
-        }
+        blockCount++;
+        raycastBlocker.SetActive(true);
     }
 
-    public void UnblockAll()
+    private void UnblockRaycasts()
     {
-        foreach (var panel in interactivePanels)
-        {
-            panel.interactable = true;
-            panel.blocksRaycasts = true;
-        }
+        blockCount = Mathf.Max(0, blockCount - 1);
+        if (blockCount == 0)
+            raycastBlocker.SetActive(false);
     }
 
-    public bool IsInteractionBlocked()
+    public void ShowPopup(string message)
     {
-        foreach (var group in interactivePanels)
-        {
-            if (!group.interactable)
-                return true;
-        }
-        return false;
+        SoundManager.Instance.PlayErrorSound();
+        popupUI.Show(message);
+        BlockRaycasts();
     }
+
+    public void HidePopup()
+    {
+        popupUI.OnHide -= HidePopup; // Prevent recursion
+        SoundManager.Instance.PlayPopupCloseClick();
+        popupUI.Hide();
+        UnblockRaycasts();
+        popupUI.OnHide += HidePopup;  // Resubscribe after hiding
+    }
+
+    public void ShowBuyQuantityPopup(ItemSlot itemSlot, int maxQty, int currentGoldCoins, int currentWeight, int maxWeight, Action<ItemData, int> confirmCallback)
+    {
+        SoundManager.Instance.PlayPopupOpenClick(); // Play click sound on popup open
+        quantityPopupUI.ShowBuyPopup(itemSlot, maxQty, currentGoldCoins, currentWeight, maxWeight, confirmCallback);
+        BlockRaycasts();
+    }
+
+    public void ShowSellQuantityPopup(ItemSlot itemSlot, int maxQty, Action<ItemData, int> confirmCallback)
+    {
+        SoundManager.Instance.PlayPopupOpenClick(); // Play click sound on popup open
+        quantityPopupUI.ShowSellPopup(itemSlot, maxQty, confirmCallback);
+        BlockRaycasts();
+    }
+
+    public void HideQuantityPopup()
+    {
+        quantityPopupUI.OnHide -= HideQuantityPopup; // Prevent recursion
+        quantityPopupUI.Hide();
+        UnblockRaycasts();
+        quantityPopupUI.OnHide += HideQuantityPopup; // Resubscribe after hiding
+    }
+
+    public void ShowConfirmationPopup(string message, Action onYesCallback, Action onNoCallback = null)
+    {
+        SoundManager.Instance.PlayPopupOpenClick(); // Play click sound on popup open
+        quantityPopupUI.OnConfirmPopup -= ShowConfirmationPopup; // Prevent recursion
+        confirmationPopupUI.Show(message, onYesCallback, onNoCallback);
+        BlockRaycasts();
+        quantityPopupUI.OnConfirmPopup += ShowConfirmationPopup; // Resubscribe after hiding
+    }
+
+    public void HideConfirmationPopup()
+    {
+        confirmationPopupUI.OnHide -= HideConfirmationPopup; // Prevent recursion
+        confirmationPopupUI.Hide();
+        quantityPopupUI.Reactivate();
+        UnblockRaycasts();
+        confirmationPopupUI.OnHide += HideConfirmationPopup; // Resubscribe after hiding
+    }
+
+    public void ShowCurrency(int amount) => coinsText.text = amount.ToString();
+
+    public void ShowToaster(string message) => toasterUI.ShowMessage(message);
+
+    public void CloseGame()
+    {
+        ShowConfirmationPopup(
+            StringConstants.CLOSE_GAME_CONFIRMATION_POPUP,
+            () =>
+            {
+#if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+            },
+            null
+        );
+    }
+
 }

@@ -10,10 +10,7 @@ public class ToasterUI : MonoBehaviour
 
     private Coroutine currentCoroutine;
 
-    private void Awake()
-    {
-        panel.SetActive(false);
-    }
+    private void Awake() => panel.SetActive(false);
 
     public void ShowMessage(string message)
     {
