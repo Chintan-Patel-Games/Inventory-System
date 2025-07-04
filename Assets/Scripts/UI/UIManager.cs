@@ -118,6 +118,7 @@ public class UIManager : MonoBehaviour
 
     public void CloseGame()
     {
+        BlockRaycasts(); // Block raycasts before showing confirmation
         ShowConfirmationPopup(
             StringConstants.CLOSE_GAME_CONFIRMATION_POPUP,
             () =>
@@ -128,7 +129,7 @@ public class UIManager : MonoBehaviour
             Application.Quit();
 #endif
             },
-            null
+            UnblockRaycasts
         );
     }
 
