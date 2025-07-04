@@ -13,16 +13,10 @@ public abstract class ItemContainerBase
     }
 
     public IReadOnlyList<ItemSlot> GetAllSlots() => slots;
-    public ItemSlot GetSlot(int index) => IsValidIndex(index) ? slots[index] : null;
+
     public int Count => slots?.Count ?? 0;
 
     protected bool IsValidIndex(int index) => index >= 0 && index < Count;
-
-    public void ClearAllSlots()
-    {
-        foreach (var slot in slots)
-            slot.Clear();
-    }
 
     public int GetTotalQuantityOf(ItemData item)
     {

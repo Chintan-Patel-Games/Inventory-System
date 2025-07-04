@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public class InventoryModel : ItemContainerBase
 {
@@ -13,8 +14,7 @@ public class InventoryModel : ItemContainerBase
 
     public bool AddItem(ItemData item, int count = 1)
     {
-        if (item == null || count <= 0)
-            return false;
+        if (item == null || count <= 0) return false;
 
         bool inventoryChanged = false;
         int originalCount = count; // Track how many we tried to add
@@ -64,21 +64,45 @@ public class InventoryModel : ItemContainerBase
         return count == 0;
     }
 
-
-    public void RemoveItem(ItemData item, int quantity = 1)
+    public void RemoveItem(ItemData item, int slotIndex, int count)
     {
-        if (item == null || quantity <= 0) return;
+        if (item == null || count <= 0 || !IsValidIndex(slotIndex))
+            return;
 
-        foreach (var slot in slots)
+        int remaining = count;
+
+        // 1. Try to remove from the specified slot
+        var primarySlot = slots[slotIndex];
+        if (primarySlot.item == item && primarySlot.count > 0)
         {
-            if (slot.item == item)
-            {
-                int remove = Math.Min(quantity, slot.count);
-                slot.count -= remove;
-                quantity -= remove;
+            int removeFromPrimary = Mathf.Min(primarySlot.count, remaining);
+            primarySlot.count -= removeFromPrimary;
+            remaining -= removeFromPrimary;
 
-                if (slot.count <= 0)
-                    slot.Clear();
+            if (primarySlot.count <= 0)
+                primarySlot.Clear();
+        }
+
+        // 2. Only proceed to other slots if still remaining
+        if (remaining > 0)
+        {
+            for (int i = slots.Count - 1; i >= 0; i--)
+            {
+                if (i == slotIndex) continue;
+
+                var slot = slots[i];
+                if (slot.item == item && slot.count > 0)
+                {
+                    int removeFromThis = Mathf.Min(slot.count, remaining);
+                    slot.count -= removeFromThis;
+                    remaining -= removeFromThis;
+
+                    if (slot.count <= 0)
+                        slot.Clear();
+
+                    if (remaining <= 0)
+                        break;
+                }
             }
         }
 

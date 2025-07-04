@@ -6,6 +6,7 @@ public class GatherManager : MonoBehaviour
 {
     [SerializeField] private ItemData[] gatherableItems;
     [SerializeField] private RarityDropConfig rarityConfig;
+    [SerializeField] private UIManager uiManager;
 
     // Event triggered when a valid item is gathered
     public event Action<ItemData, int> OnItemGathered;
@@ -43,15 +44,15 @@ public class GatherManager : MonoBehaviour
 
             if (currentWeight + weightToAdd > maxWeight)
             {
-                PopupUI.Instance.Show(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP);
+                uiManager.ShowPopup(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP);
                 return;
             }
 
             currentWeight += weightToAdd;
+            SoundManager.Instance.PlayUIClick();
             OnItemGathered?.Invoke(item, quantity);
         }
     }
-
 
     public ItemData GetRandomItemBasedOnValue(int totalValue, out int quantity)
     {

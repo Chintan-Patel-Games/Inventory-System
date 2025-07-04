@@ -1,28 +1,22 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PopupUI : MonoBehaviour
 {
-    public static PopupUI Instance { get; private set; }
-
     [SerializeField] private GameObject panel;
     [SerializeField] private TMP_Text messageText;
     [SerializeField] private Button closeButton;
 
+    public Action OnHide;
+
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        Instance = this;
-
         panel.SetActive(false);
 
         if (closeButton != null)
-            closeButton.onClick.AddListener(ClosePopup);
+            closeButton.onClick.AddListener(Hide);
     }
 
     public void Show(string message)
@@ -33,5 +27,9 @@ public class PopupUI : MonoBehaviour
         panel.SetActive(true);
     }
 
-    public void ClosePopup() => panel.SetActive(false);
+    public void Hide()
+    {
+        panel.SetActive(false);
+        OnHide?.Invoke(); // <- Notify UIManager
+    }
 }
