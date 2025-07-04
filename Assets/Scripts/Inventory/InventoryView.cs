@@ -82,7 +82,7 @@ public class InventoryView : MonoBehaviour
 
         if (totalWeight >= getMaxWeightLimit())
         {
-            uiManager.ShowPopup(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP);
+            uiManager.ShowPopup(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP, 2f);
             return;
         }
 

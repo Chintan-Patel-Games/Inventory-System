@@ -20,9 +20,6 @@ public class QuantityPopupUI : MonoBehaviour
     [SerializeField] private Button confirmButton;
     [SerializeField] private Button closeButton;
 
-    [SerializeField] private ConfirmationPopupUI confirmationPopup;
-    [SerializeField] private PopupUI popup;
-
     private CanvasGroup canvasGroup;
 
     private ItemSlot currentItemSlot;
@@ -33,6 +30,7 @@ public class QuantityPopupUI : MonoBehaviour
 
     // Notifies the UIManager to show a confirmation popup
     public event Action<string, Action, Action> OnConfirmPopup;
+    public event Action<string, float> OnPopup;
 
     // Holds the actual transaction logic (buy/sell logic)
     private Action<ItemData, int> onTransactionConfirmed;
@@ -67,8 +65,7 @@ public class QuantityPopupUI : MonoBehaviour
 
         if (sliderMax <= 0)
         {
-            SoundManager.Instance.PlayErrorSound();
-            popup.Show(StringConstants.NOT_ENOUGH_SPACE_OR_COINS);
+            OnPopup?.Invoke(StringConstants.NOT_ENOUGH_SPACE_OR_COINS, 2f);
             return;
         }
 
@@ -122,8 +119,6 @@ public class QuantityPopupUI : MonoBehaviour
     private void IncreaseQuantity()
     {
         SoundManager.Instance.PlayUIClick(); // Play click sound on increase
-        // Enforce a hard limit of 100
-        affordableQty = Mathf.Min(affordableQty, 100);
 
         int maxQty = isBuying ? affordableQty : maxAvailableQty;
 
@@ -138,6 +133,7 @@ public class QuantityPopupUI : MonoBehaviour
     private void DecreaseQuantity()
     {
         SoundManager.Instance.PlayUIClick(); // Play click sound on decrease
+
         if (currentQty > quantitySlider.minValue)
         {
             currentQty--;
@@ -165,7 +161,6 @@ public class QuantityPopupUI : MonoBehaviour
 
     public void Hide()
     {
-        SoundManager.Instance.PlayPopupCloseClick(); // Play Popup close sound
         panel.SetActive(false);
         onTransactionConfirmed = null;
         currentItemSlot = null;
