@@ -36,17 +36,9 @@ public class InventoryController : MonoBehaviour
 
     public void RefreshAllSlots() => view.RefreshAllSlots();
 
-    private void HandleItemGathered(ItemData item, int quantity)
-    {
-        bool added = AddItem(item, quantity);
-        if (!added) uiManager.ShowPopup(StringConstants.INVENTORY_FULL_POPUP);
-    }
+    private void HandleItemGathered(ItemData item, int quantity) => AddItem(item, quantity);
 
-    private void HandleItemBought(ItemData item, int quantity)
-    {
-        bool added = AddItem(item, quantity);
-        if (!added) uiManager.ShowPopup(StringConstants.INVENTORY_FULL_POPUP);
-    }
+    private void HandleItemBought(ItemData item, int quantity) => AddItem(item, quantity);
 
     public void HandleItemSold(ItemData item, int slotIndex, int quantity) => RemoveItem(item, slotIndex, quantity);
 
@@ -56,7 +48,7 @@ public class InventoryController : MonoBehaviour
 
         bool success = model.AddItem(item, count);
 
-        if (!success) uiManager.ShowPopup(StringConstants.INVENTORY_FULL_POPUP);
+        if (!success) uiManager.ShowPopup(StringConstants.INVENTORY_FULL_POPUP, 2f);
 
         return success;
     }

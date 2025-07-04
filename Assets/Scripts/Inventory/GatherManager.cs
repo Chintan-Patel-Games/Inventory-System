@@ -44,7 +44,7 @@ public class GatherManager : MonoBehaviour
 
             if (currentWeight + weightToAdd > maxWeight)
             {
-                uiManager.ShowPopup(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP);
+                uiManager.ShowPopup(StringConstants.MAX_WEIGHT_LIMIT_REACHED_POPUP, 2f);
                 return;
             }
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,8 +25,8 @@ public class UIManager : MonoBehaviour
     {
         quantityPopupUI.OnHide += HideQuantityPopup;
         quantityPopupUI.OnConfirmPopup += ShowConfirmationPopup;
+        quantityPopupUI.OnPopup += ShowPopup;
         confirmationPopupUI.OnHide += HideConfirmationPopup;
-        popupUI.OnHide += HidePopup;
 
         closeGame.onClick.AddListener(CloseGame);
     }
@@ -43,20 +44,24 @@ public class UIManager : MonoBehaviour
             raycastBlocker.SetActive(false);
     }
 
-    public void ShowPopup(string message)
+    public void ShowPopup(string message, float autoCloseDelay = -1f)
     {
         SoundManager.Instance.PlayErrorSound();
+        quantityPopupUI.OnPopup -= ShowPopup; // Prevent recursion
         popupUI.Show(message);
+        quantityPopupUI.OnPopup += ShowPopup; // Resubscribe after hiding
+
+        if (autoCloseDelay > 0)
+            StartCoroutine(AutoClosePopup(autoCloseDelay));
+
         BlockRaycasts();
     }
 
-    public void HidePopup()
+    private IEnumerator AutoClosePopup(float delay)
     {
-        popupUI.OnHide -= HidePopup; // Prevent recursion
-        SoundManager.Instance.PlayPopupCloseClick();
+        yield return new WaitForSeconds(delay);
         popupUI.Hide();
         UnblockRaycasts();
-        popupUI.OnHide += HidePopup;  // Resubscribe after hiding
     }
 
     public void ShowBuyQuantityPopup(ItemSlot itemSlot, int maxQty, int currentGoldCoins, int currentWeight, int maxWeight, Action<ItemData, int> confirmCallback)
@@ -75,6 +80,7 @@ public class UIManager : MonoBehaviour
 
     public void HideQuantityPopup()
     {
+        SoundManager.Instance.PlayPopupCloseClick(); // Play Popup close sound
         quantityPopupUI.OnHide -= HideQuantityPopup; // Prevent recursion
         quantityPopupUI.Hide();
         UnblockRaycasts();
@@ -86,7 +92,6 @@ public class UIManager : MonoBehaviour
         SoundManager.Instance.PlayPopupOpenClick(); // Play click sound on popup open
         quantityPopupUI.OnConfirmPopup -= ShowConfirmationPopup; // Prevent recursion
         confirmationPopupUI.Show(message, onYesCallback, onNoCallback);
-        BlockRaycasts();
         quantityPopupUI.OnConfirmPopup += ShowConfirmationPopup; // Resubscribe after hiding
     }
 
@@ -95,7 +100,6 @@ public class UIManager : MonoBehaviour
         confirmationPopupUI.OnHide -= HideConfirmationPopup; // Prevent recursion
         confirmationPopupUI.Hide();
         quantityPopupUI.Reactivate();
-        UnblockRaycasts();
         confirmationPopupUI.OnHide += HideConfirmationPopup; // Resubscribe after hiding
     }
 
