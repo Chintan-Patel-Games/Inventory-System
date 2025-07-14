@@ -22,6 +22,7 @@ public static class StringConstants
     public static string BUY_CONFIRMATION_POPUP = "Do you want to buy\n{0} x {1}\nfor {2}";
     public static string SELL_CONFIRMATION_POPUP = "Do you want to sell\n{0} x {1}\nfor {2}";
     public static string CLOSE_GAME_CONFIRMATION_POPUP = "Are you sure you want to exit the game?";
+    public static string WEBGL_CLOSE_GAME_POPUP = "Cannot quit the game in WebGL. Please close the tab or window.";
 
     // Toaster Messages
     public static string BUY_TOASTER = "You Bought {0} x {1}";

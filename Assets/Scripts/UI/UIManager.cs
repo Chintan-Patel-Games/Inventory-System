@@ -119,12 +119,16 @@ public class UIManager : MonoBehaviour
     public void CloseGame()
     {
         BlockRaycasts(); // Block raycasts before showing confirmation
+
         ShowConfirmationPopup(
             StringConstants.CLOSE_GAME_CONFIRMATION_POPUP,
             () =>
             {
 #if UNITY_EDITOR
                 UnityEditor.EditorApplication.isPlaying = false;
+#elif UNITY_WEBGL
+            UnblockRaycasts();
+            ShowToaster(StringConstants.WEBGL_CLOSE_GAME_POPUP);
 #else
             Application.Quit();
 #endif
@@ -132,5 +136,4 @@ public class UIManager : MonoBehaviour
             UnblockRaycasts
         );
     }
-
 }
