@@ -23,7 +23,7 @@ This is a Unity-based 2D project that features a fully functional **Inventory an
 ---
 
 ## 🧱 Architecture Overview
-![Architecture Diagram](https://github.com/Chintan-Patel-Games/Inventory-System/blob/Project-Setup/Assets/Sprites/Inventory%20System%20Project%20Architecture.jpg)
+![Architecture Diagram](https://github.com/Chintan-Patel-Games/Inventory-System/blob/Project-Setup/Assets/Docs/Inventory%20System%20Project%20Architecture.jpg)
 
 ---
 
@@ -42,7 +42,8 @@ This is a Unity-based 2D project that features a fully functional **Inventory an
 ---
 
 ## 🎥 Gameplay Video
-[![Watch the video]
+
+[![Watch the demo](https://img.youtube.com/vi/YpmJ569aeRw/maxresdefault.jpg)](https://www.youtube.com/watch?v=YpmJ569aeRw)
 
 ---
 
